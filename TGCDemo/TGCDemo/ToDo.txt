@@ -1,0 +1,47 @@
+### Current: ###
+
+
+### Next: ###
+- Code Structure
+	- necessary classes, functions
+	- rough structure/empty classes
+
+- Data Structures
+	- Geometry
+	- Material
+	- Scene
+	- ParticleSystem 
+	- Shader
+
+- Particle System
+	- Renderer (Splatting)
+	- Geometry Shaders (swap buffer approach)
+
+- moving camera (copy from rebelcraft?)
+
+- Renderer
+	- Deferred rendering
+	 - shader
+		- Worldgeometry -> GBuffer -> ParicleSystem -> combine Particles and GBuffer on final render
+		- Splat Particles onto final.
+	- TextureToScreen
+	 - shader
+
+
+
+- TestScene
+	- Block
+	- Plane
+
+---------NTH--------------
+
+- Particles respond to music (pulse)
+	-^get sound input
+	- get volume / frequency of sound (tone)
+	- channels?
+
+
+########### Done: ############
+
+- Install necessary tools and software
+- prepare empty project
