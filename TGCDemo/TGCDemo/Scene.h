@@ -19,11 +19,11 @@
 
 class App;
 
-class World
+class Scene
 {
 public:
-	explicit World(App*);
-	~World(void);
+	explicit Scene(App*);
+	~Scene(void);
 
 	App* GetApp();
 

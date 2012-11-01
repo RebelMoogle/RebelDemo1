@@ -7,7 +7,14 @@
 class BaseGeometry
 {
 public:
-	BaseGeometry(void);
-	~BaseGeometry(void);
+	explicit BaseGeometry(void);
+	virtual ~BaseGeometry(void);
+
+	void Bind(ID3D11DeviceContext* ImmediateContext);
+	void Render(ID3D11DeviceContext* ImmediateContext);
+
+protected:
+
+	// Vertex Buffer and stuffs
 };
 

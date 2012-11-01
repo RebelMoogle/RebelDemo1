@@ -383,14 +383,15 @@
     <ClCompile Include="GeometryInstance.cpp" />
     <ClCompile Include="MainApp.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
-    <ClCompile Include="World.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClInclude Include="BaseGeometry.h" />
     <ClInclude Include="BaseMaterial.h" />
     <ClInclude Include="GeometryInstance.h" />
     <ClInclude Include="MainApp.h" />
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="Shader.h" />
-    <ClInclude Include="World.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="StaticCamera.h" />
     <None Include="DXUT\Optional\directx.ico" />
     <ClInclude Include="DXUT\Core\DXUT.h" />
     <ClInclude Include="DXUT\Core\DXUTDevice11.h" />
@@ -414,9 +415,11 @@
     <ClCompile Include="DXUT\Optional\DXUTsettingsdlg.cpp" />
     <ClCompile Include="DXUT\Optional\SDKmesh.cpp" />
     <ClCompile Include="DXUT\Optional\SDKmisc.cpp" />
+    <None Include="Shaders\TextureToScreen.hlsl" />
     <None Include="ToDo.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="StaticCamera.cpp" />
     <ClCompile Include="TGCDemo.cpp" />
   </ItemGroup>
   <ItemGroup>

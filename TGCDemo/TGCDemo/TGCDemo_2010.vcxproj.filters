@@ -8,6 +8,9 @@
     <Filter Include="DXUT">
       <UniqueIdentifier>{a43c5c25-0e86-4a20-b64a-883785ff74fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{cfc2cb29-1669-41b0-aeaf-07791e19d128}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXUT\Optional\directx.ico">
@@ -74,24 +77,29 @@
       <Filter>DXUT</Filter>
     </ClCompile>
     <None Include="ToDo.txt" />
+    <None Include="Shaders\TextureToScreen.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TGCDemo.cpp" />
-    <ClCompile Include="World.cpp" />
     <ClCompile Include="MainApp.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="BaseGeometry.cpp" />
     <ClCompile Include="GeometryInstance.cpp" />
     <ClCompile Include="BaseMaterial.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="StaticCamera.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="World.h" />
     <ClInclude Include="MainApp.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="BaseGeometry.h" />
     <ClInclude Include="GeometryInstance.h" />
     <ClInclude Include="BaseMaterial.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="StaticCamera.h" />
   </ItemGroup>
   <ItemGroup>
     <CLInclude Include="resource.h">
