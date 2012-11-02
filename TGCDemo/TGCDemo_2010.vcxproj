@@ -415,7 +415,20 @@
     <ClCompile Include="DXUT\Optional\DXUTsettingsdlg.cpp" />
     <ClCompile Include="DXUT\Optional\SDKmesh.cpp" />
     <ClCompile Include="DXUT\Optional\SDKmisc.cpp" />
-    <None Include="Shaders\TextureToScreen.hlsl" />
+    <None Include="Shaders\GPUParticles.hlsl">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="Shaders\ParticleSystem.hlsl" />
+    <None Include="Shaders\RenderParticles.hlsl" />
+    <None Include="Shaders\ShaderConstants.hlsl">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="Shaders\ParticleSystem.txt" />
+    <None Include="Shaders\ShaderConstants.txt" />
+    <None Include="Shaders\SplatPhotons.hlsl" />
+    <None Include="Shaders\TextureToScreen.hlsl">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="ToDo.txt" />
   </ItemGroup>
   <ItemGroup>

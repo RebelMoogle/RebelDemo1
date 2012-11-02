@@ -10,6 +10,8 @@
     </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{cfc2cb29-1669-41b0-aeaf-07791e19d128}</UniqueIdentifier>
+      <ParseFiles>false</ParseFiles>
+      <SourceControlFiles>False</SourceControlFiles>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -77,9 +79,14 @@
       <Filter>DXUT</Filter>
     </ClCompile>
     <None Include="ToDo.txt" />
-    <None Include="Shaders\TextureToScreen.hlsl">
-      <Filter>Shaders</Filter>
-    </None>
+    <None Include="Shaders\ParticleSystem.txt" />
+    <None Include="Shaders\ShaderConstants.txt" />
+    <None Include="Shaders\SplatPhotons.hlsl" />
+    <None Include="Shaders\ParticleSystem.hlsl" />
+    <None Include="Shaders\GPUParticles.hlsl" />
+    <None Include="Shaders\ShaderConstants.hlsl" />
+    <None Include="Shaders\TextureToScreen.hlsl" />
+    <None Include="Shaders\RenderParticles.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TGCDemo.cpp" />

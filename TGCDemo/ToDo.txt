@@ -1,9 +1,15 @@
 ### Current: ###
 - Particle System 2-3 hours
-	- set up D3D cpu side
-	- render simple particle
+	- set up D3D cpu side for rendering
+		- Renderer (Splatting) 2 hours
+	- render simple particle (fake particle buffer)
+		- duration
+		- size
+		- force
+		- multiple particles (spawn rate)
+		- limit
+	- create real particle buffer
 	- write geometry shader - buffer swap
-	- Renderer (Splatting) 2 hours
 	- Geometry Shaders (swap buffer approach) 2 hours.
 
 ### Next: ###
@@ -23,6 +29,10 @@
 - TestScene 1.5 hours
 	- Block
 	- Plane
+
+- Particle System Lines
+- Particle System Swirls (Flower / Tree)
+- change from lines into swirls (map? dynamically change according to position / points?)
 
 ---------NTH--------------
 
