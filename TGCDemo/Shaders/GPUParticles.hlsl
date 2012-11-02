@@ -22,7 +22,7 @@ struct VS_PARTICLE
 
 struct GS_PARTICLE
 {
-	float4 position	: SV_POSITION;
+	float3 position	: SV_POSITION;
 	float  duration	: DURATION;
 };
 

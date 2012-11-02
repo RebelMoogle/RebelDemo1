@@ -1,5 +1,6 @@
 #pragma once
 #include "Shader.h"
+#include <vector>
 
 /******************
 	Base Particle System
@@ -32,15 +33,26 @@ public:
 
 	void Update();
 
-	void Render();
+	void Render(ID3D11DeviceContext* d3dDeviceContext);
 
 private:
 
-	ID3D11InputLayout* mMeshVertexLayout;
+	void CreateParticleBuffers(ID3D11DeviceContext* d3dDeviceContext, ID3D11DepthStencilView* depthBufferView);
 
+	ID3D11InputLayout* mParticleLayout;
+	std::vector<ID3D11Buffer*> mParticleBuffers;
+
+	ID3D11ShaderResourceView* particleTexture;
+
+	// shader for computing particles. output directly to buffer
 	VertexShader* mParticleSystemVS;
-	GeometryShader* mParticleSystemGS;
-	PixelShader* mParticleSystemPS;
+	ID3D11GeometryShader* mParticleSystemGS; // no output stream shader factory yet. 
+	
+
+	// shader for rendering particles, render to quads created for every particle in Geometry Shader
+	VertexShader* mRenderParticlesVS;
+	GeometryShader* mRenderParticlesGS;
+	PixelShader* mRenderParticlesPS;
 
 	ID3D11Buffer* mParticleCBuffer;
 	ID3D11RasterizerState* mRasterizerState;

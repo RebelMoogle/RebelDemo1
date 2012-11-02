@@ -35,6 +35,7 @@
 - change from lines into swirls (map? dynamically change according to position / points?)
 
 ---------NTH--------------
+- check for consistency (names, style, etc)
 
 - Particles respond to music (pulse)
 	-^get sound input
