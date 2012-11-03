@@ -1,22 +1,29 @@
 ### Current: ###
-- Particle System 2-3 hours
-	- set up D3D cpu side for rendering
-		- Renderer (Splatting) 2 hours
-	- render simple particle (fake particle buffer)
+
+- moving camera (copy from rebelcraft?) - saturday
+ - CFirstPersonCamea from DXUTCamera
+
+- render testbox in middle
+
+### Next: ###
+
+- integrate new classes into program. saturday
+	- call all the methods! -> particle system
+
+- Particle System	saturday
+	- Geometry Shaders (swap buffer approach) 2 hours.
+	- create real particle buffer
+	- write geometry shader - buffer swap
+		- check shader code
+	- render simple particle
 		- duration
 		- size
 		- force
 		- multiple particles (spawn rate)
 		- limit
-	- create real particle buffer
-	- write geometry shader - buffer swap
-	- Geometry Shaders (swap buffer approach) 2 hours.
 
-### Next: ###
 
-- moving camera (copy from rebelcraft?) 1 hour
-
-- Renderer 2 - 3 hours
+- Renderer 2 - 3 hours		sunday
 	- Deferred rendering 1.5 hour
 	 - shader 
 		- Worldgeometry -> GBuffer -> ParicleSystem -> combine Particles and GBuffer on final render
@@ -26,13 +33,19 @@
 
 
 
-- TestScene 1.5 hours
+- TestScene 1.5 hours		sunday
 	- Block
 	- Plane
 
-- Particle System Lines
-- Particle System Swirls (Flower / Tree)
-- change from lines into swirls (map? dynamically change according to position / points?)
+- Particle System Lines		monday
+- Particle System Swirls (Flower / Tree) monday
+- change from lines into swirls (map? dynamically change according to position / points?) tue/wed
+
+- make animation/movie/automatic run. thu/fri (take saturday off!)
+
+- Saturday final touches
+
+- Sunday NTH
 
 ---------NTH--------------
 - check for consistency (names, style, etc)
@@ -42,8 +55,21 @@
 	- get volume / frequency of sound (tone)
 	- channels?
 
+- Make into reusable project. 
+	- but Particle System into interface / folders.
+	- organize code
+	- throw away unecessary stuff
+
 
 ########### Done: ############
+
+- Particle System 2-3 hours
+	- set up D3D cpu side for rendering
+		- Renderer (Splatting) 2 hours
+		x- Particle Texture
+		x- buffers
+		x- states
+		x- draw functions
 
 - Install necessary tools and software
 - prepare empty project

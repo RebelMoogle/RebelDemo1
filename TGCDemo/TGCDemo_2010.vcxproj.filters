@@ -87,6 +87,7 @@
     <None Include="Shaders\ShaderConstants.hlsl" />
     <None Include="Shaders\TextureToScreen.hlsl" />
     <None Include="Shaders\RenderParticles.hlsl" />
+    <None Include="Media\Particle1.png" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TGCDemo.cpp" />
@@ -96,7 +97,6 @@
     <ClCompile Include="GeometryInstance.cpp" />
     <ClCompile Include="BaseMaterial.cpp" />
     <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="StaticCamera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainApp.h" />
@@ -106,7 +106,6 @@
     <ClInclude Include="GeometryInstance.h" />
     <ClInclude Include="BaseMaterial.h" />
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="StaticCamera.h" />
   </ItemGroup>
   <ItemGroup>
     <CLInclude Include="resource.h">

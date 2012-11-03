@@ -13,7 +13,7 @@
 //--------------------------------------------------------------------------------------
 // Constant Buffer Variables
 //--------------------------------------------------------------------------------------
-Texture2D particleTex : register(t1);
+Texture2D<float4> particleTex : register(t1);
 
 
 // Need Depth and Blend States?

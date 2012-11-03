@@ -39,6 +39,8 @@ void MainApp::D3DReleaseDevice()
 bool MainApp::D3DCreateSwapChain( ID3D11Device* Device, IDXGISwapChain* SwapChain, const DXGI_SURFACE_DESC* BackBufferSurfaceDesc )
 {
 
+
+	return true;
 }
 
 void MainApp::D3DReleaseSwapChain()

@@ -18,6 +18,9 @@
 #include "Shader.h"
 
 class App;
+class BaseGeometry;
+class BaseMaterial;
+class BaseGeometryInstance;
 
 class Scene
 {
@@ -57,6 +60,10 @@ private:
 
 	// Parent App.
 	App* const parentApp;
+
+	std::vector<BaseGeometry*> _Geometries;
+	std::vector<BaseMaterial*> _Materials;
+	std::vector<BaseGeometryInstance*> _GeometryInstances;
 
 	// ### GBuffer stuff ###
 	VertexShader* craftMyGBufferVS;

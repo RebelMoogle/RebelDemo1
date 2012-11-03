@@ -160,8 +160,8 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
     DXUTCreateWindow( L"TGCDemo" );
 
     // Only require 10-level hardware
-    DXUTCreateDevice( D3D_FEATURE_LEVEL_10_0, true, 640, 480 );
-    DXUTMainLoop(); // Enter into the DXUT ren  der loop
+    DXUTCreateDevice( D3D_FEATURE_LEVEL_11_0, true, 1280, 1024 );
+    DXUTMainLoop(); // Enter into the DXUT render loop
 
     // Perform any application-level cleanup here
 

@@ -1,4 +1,6 @@
 #pragma once
+#include "BaseGeometry.h"
+#include "BaseMaterial.h"
 
 /************************************************************************/
 /* Geometry Instance manangement

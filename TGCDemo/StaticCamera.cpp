@@ -1,9 +1,6 @@
 #include "DXUT.h"
-#include "Util.h"
 #include "StaticCamera.h"
 #include "XNAMath.h"
-#include "ContentLoader.h"
-#include "OptixTypes.h"
 
 
 StaticCamera::StaticCamera(void) : 

@@ -17,6 +17,12 @@
 
 */
 
+struct PARTICLEDATA
+{
+	D3DXVECTOR3 position;
+	float duration;
+};
+
 class ParticleSystem
 {
 public:
@@ -37,10 +43,14 @@ public:
 
 private:
 
-	void CreateParticleBuffers(ID3D11DeviceContext* d3dDeviceContext, ID3D11DepthStencilView* depthBufferView);
+	// PARTICLE SYSTEM SETTINGS
+	UINT mMaxParticleCount;
+
+	bool mInitParticle;
 
 	ID3D11InputLayout* mParticleLayout;
-	std::vector<ID3D11Buffer*> mParticleBuffers;
+	ID3D11Buffer* mParticleBufferStream;
+	ID3D11Buffer* mParticleBufferDraw;
 
 	ID3D11ShaderResourceView* particleTexture;
 
@@ -55,6 +65,7 @@ private:
 	PixelShader* mRenderParticlesPS;
 
 	ID3D11Buffer* mParticleCBuffer;
+	ID3D11ShaderResourceView* mParticleTexture;
 	ID3D11RasterizerState* mRasterizerState;
 	ID3D11SamplerState* mDiffuseSampler;
 	ID3D11DepthStencilState* mDepthState;

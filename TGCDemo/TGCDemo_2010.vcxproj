@@ -391,7 +391,6 @@
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="StaticCamera.h" />
     <None Include="DXUT\Optional\directx.ico" />
     <ClInclude Include="DXUT\Core\DXUT.h" />
     <ClInclude Include="DXUT\Core\DXUTDevice11.h" />
@@ -415,6 +414,7 @@
     <ClCompile Include="DXUT\Optional\DXUTsettingsdlg.cpp" />
     <ClCompile Include="DXUT\Optional\SDKmesh.cpp" />
     <ClCompile Include="DXUT\Optional\SDKmisc.cpp" />
+    <None Include="Media\Particle1.png" />
     <None Include="Shaders\GPUParticles.hlsl">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -432,7 +432,6 @@
     <None Include="ToDo.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="StaticCamera.cpp" />
     <ClCompile Include="TGCDemo.cpp" />
   </ItemGroup>
   <ItemGroup>
