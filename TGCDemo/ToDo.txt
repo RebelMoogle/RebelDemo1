@@ -1,9 +1,14 @@
 ### Current: ###
 
 - moving camera (copy from rebelcraft?) - saturday
- - CFirstPersonCamea from DXUTCamera
+ x- CFirstPersonCamea from DXUTCamera
+ - set constant buffer from camera data
+ - set constant buffer in shader.
+ - simple rendering shader.
 
-- render testbox in middle
+- render testbox in middle - sat
+	x- make box geometry
+	- create testScene
 
 ### Next: ###
 
@@ -37,7 +42,7 @@
 	- Block
 	- Plane
 
-- Particle System Lines		monday
+- Particle System Lines		sunday/monday
 - Particle System Swirls (Flower / Tree) monday
 - change from lines into swirls (map? dynamically change according to position / points?) tue/wed
 

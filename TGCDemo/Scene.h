@@ -30,11 +30,11 @@ public:
 
 	App* GetApp();
 
-	void AddGeometry();
+	void AddGeometry(BaseGeometry* Geometry);
 
-	void AddMaterial();
+	void AddMaterial(BaseMaterial* BaseMaterial);
 
-	void CreateGeometryInstance();
+	void CreateGeometryInstance(BaseGeometry* Geometry, BaseMaterial* Material);
 
 	void SetCamera();
 

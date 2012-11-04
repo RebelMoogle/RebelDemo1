@@ -97,6 +97,10 @@
     <ClCompile Include="GeometryInstance.cpp" />
     <ClCompile Include="BaseMaterial.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="BaseSceneBuilder.cpp" />
+    <ClCompile Include="TestSceneBuilder.cpp" />
+    <ClCompile Include="BoxGeometry.cpp" />
+    <ClCompile Include="DefaultMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainApp.h" />
@@ -106,6 +110,12 @@
     <ClInclude Include="GeometryInstance.h" />
     <ClInclude Include="BaseMaterial.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="ConstantBuffer.h" />
+    <ClInclude Include="constants.h" />
+    <ClInclude Include="BaseSceneBuilder.h" />
+    <ClInclude Include="TestSceneBuilder.h" />
+    <ClInclude Include="BoxGeometry.h" />
+    <ClInclude Include="DefaultMaterial.h" />
   </ItemGroup>
   <ItemGroup>
     <CLInclude Include="resource.h">

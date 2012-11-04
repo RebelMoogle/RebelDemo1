@@ -20,8 +20,12 @@ public:
 	virtual void BindParams(ID3D11DeviceContext* ImmediateContext) = 0;
 
 protected:
+	// D3D input layout (assumes pos/normal layout...)
+	ID3D11InputLayout* mInputLayout;
 
-	//loading the effect, input layout shaders for material
+	// TODO: Shader	
+	VertexShader* materialVS;
+	PixelShader* materialPS;
 
 };
 

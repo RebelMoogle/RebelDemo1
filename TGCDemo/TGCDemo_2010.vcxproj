@@ -380,17 +380,26 @@
   <ItemGroup>
     <ClCompile Include="BaseGeometry.cpp" />
     <ClCompile Include="BaseMaterial.cpp" />
+    <ClCompile Include="BaseSceneBuilder.cpp" />
+    <ClCompile Include="BoxGeometry.cpp" />
+    <ClCompile Include="DefaultMaterial.cpp" />
     <ClCompile Include="GeometryInstance.cpp" />
     <ClCompile Include="MainApp.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClInclude Include="BaseGeometry.h" />
     <ClInclude Include="BaseMaterial.h" />
+    <ClInclude Include="BaseSceneBuilder.h" />
+    <ClInclude Include="BoxGeometry.h" />
+    <ClInclude Include="ConstantBuffer.h" />
+    <ClInclude Include="constants.h" />
+    <ClInclude Include="DefaultMaterial.h" />
     <ClInclude Include="GeometryInstance.h" />
     <ClInclude Include="MainApp.h" />
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="TestSceneBuilder.h" />
     <None Include="DXUT\Optional\directx.ico" />
     <ClInclude Include="DXUT\Core\DXUT.h" />
     <ClInclude Include="DXUT\Core\DXUTDevice11.h" />
@@ -432,6 +441,7 @@
     <None Include="ToDo.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="TestSceneBuilder.cpp" />
     <ClCompile Include="TGCDemo.cpp" />
   </ItemGroup>
   <ItemGroup>

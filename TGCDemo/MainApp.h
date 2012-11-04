@@ -12,6 +12,9 @@
 /************************************************************************/
 
 #include "DXUT.h"
+#include "DXUT\Optional\DXUTcamera.h"
+#include "Scene.h"
+#include "ConstantBuffer.h"
 
 class MainApp
 {
@@ -28,12 +31,21 @@ public:
 		float fElapsedTime
 		);
 
-	void HandleMessages(HWND, UINT, WPARAM, LPARAM, bool*);
+	void HandleMessages(HWND, UINT, WPARAM, LPARAM);
 
 	bool D3DCreateDevice(ID3D11Device* Device, const DXGI_SURFACE_DESC* BackBufferSurfaceDesc);
 	void D3DReleaseDevice();
 
 	bool D3DCreateSwapChain(ID3D11Device* Device, IDXGISwapChain* SwapChain, const DXGI_SURFACE_DESC* BackBufferSurfaceDesc);
 	void D3DReleaseSwapChain();
+
+private:
+
+	CFirstPersonCamera* mViewerCamera;
+	ConstantBuffer<CameraConstants>* cameraCBuffer;
+
+
+	Scene* currentScene;
+	//include SceneBuilder?
 };
 
