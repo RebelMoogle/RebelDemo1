@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseMaterial.h"
 #include "ConstantBuffer.h"
+#include "constants.h"
 
 struct DefaultConstants
 {
@@ -24,7 +25,7 @@ public:
 
 private:		
 
-	ConstantBuffer<OmniConstants>* omniCBuffer;
+	ConstantBuffer<DefaultConstants>* omniCBuffer;
 
 	static bool isInitialized;
 };

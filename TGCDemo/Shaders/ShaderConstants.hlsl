@@ -44,7 +44,7 @@ struct PS_PARTICLE
 
 cbuffer changesCamera: register(b0)
 {
-	float4x4 World; // object to world (of light?)
+	float4x4 World;
 	float4x4 View; 
 	float4x4 WorldViewProj;
 	float3 cameraPosition;
@@ -53,7 +53,7 @@ cbuffer changesCamera: register(b0)
 
 cbuffer changesLightCamera: register(b1)
 {
-	float4x4 lightWorld; // object to world (of light?)
+	float4x4 lightWorld;
 	float4x4 lightView; 
 	float4x4 lightWorldViewProj;
 	float lightRefractiveIndexETA;
@@ -61,8 +61,8 @@ cbuffer changesLightCamera: register(b1)
 
 cbuffer changesPerLight : register(b4)
 {
-	float4x4 lightViewProj;
-	float4x4 shadowToScreen;
+	//float4x4 lightViewProj;
+	//float4x4 shadowToScreen;
 	float4	lightPower;
 	float4	lightPositionAngle;
 	float4	lightDirectionDistance;

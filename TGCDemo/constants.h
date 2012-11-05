@@ -25,7 +25,6 @@ struct PositionNormalTexCoordVertex
 	D3DXVECTOR2 TexCoord;
 };
 
-__declspec(align(16))
 struct CameraConstants
 {
 	D3DXMATRIX World; // object to world (of light?)
@@ -33,4 +32,32 @@ struct CameraConstants
 	D3DXMATRIX WorldViewProjection;
 	D3DXVECTOR3 cameraPosition;
 	float refractiveIndexETA;
+};
+
+struct LightConstants
+{
+	//D3DXMATRIX	lightViewProj;
+	//D3DXMATRIX  shadowToScreen;
+	D3DXVECTOR4	lightPower;
+	D3DXVECTOR4 lightPositionAngle; //contains distance in w // if w is < 0.0f it is the sun!
+	D3DXVECTOR4 lightDirectionDistance; // normalized; contains Distance in w
+};
+
+__declspec(align(16))
+struct TextureToScreenConstants
+{
+	D3DXVECTOR4 mDestRect; 
+};
+
+__declspec(align(16))
+struct CraftMyGBufferConstants
+{
+	D3DXVECTOR4 diffuseConstant;
+	D3DXVECTOR4 specularConstant;
+	D3DXVECTOR3 transmissiveConstant;
+};
+
+struct geometryConstants
+{
+	D3DXMATRIX objToWorld;
 };

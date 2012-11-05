@@ -8,7 +8,7 @@ class TestSceneBuilder :
 	public BaseSceneBuilder
 {
 public:
-	explicit TestSceneBuilder(App*);
+	explicit TestSceneBuilder(MainApp*);
 
 
 	~TestSceneBuilder(void);

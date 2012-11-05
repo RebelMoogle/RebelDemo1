@@ -6,7 +6,7 @@
 #include "DefaultMaterial.h"
 
 
-TestSceneBuilder::TestSceneBuilder(App* givenApp):
+TestSceneBuilder::TestSceneBuilder(MainApp* givenApp):
 BaseSceneBuilder(givenApp)
 {
 
@@ -23,10 +23,10 @@ bool TestSceneBuilder::Init()
 	sceneToBuild = new Scene(GetApp());
 
 	// create geometry
-	BoxGeometry* groundPlane= new BoxGeometry(D3DXVECTOR3(0, -10, 0), D3DXVECTOR3(cityWidth, 10, cityDepth));
+	BoxGeometry* groundPlane= new BoxGeometry(D3DXVECTOR3(0, -10, 0), D3DXVECTOR3(1000, 10, 1000));
 	sceneToBuild->AddGeometry(groundPlane);
 
-	BoxGeometry* testBox= new BoxGeometry(D3DXVECTOR3(0, -10, 0), D3DXVECTOR3(cityWidth, 10, cityDepth));
+	BoxGeometry* testBox= new BoxGeometry(D3DXVECTOR3(0, 0, 0), D3DXVECTOR3(1, 1, 1));
 	sceneToBuild->AddGeometry(testBox);
 
 	//create material // put in constants
@@ -39,12 +39,25 @@ bool TestSceneBuilder::Init()
 	sceneToBuild->AddMaterial(matBlack);
 
 	//add to scene
-	sceneToBuild->AddGeometryInstance(groundPlane, matBlack)
-	sceneToBuild->AddGeometryInstance(testBox, matBlack)
+	sceneToBuild->CreateGeometryInstance(groundPlane, matBlack);
+	sceneToBuild->CreateGeometryInstance(testBox, matBlack);
 
 	// add and set camera
+	CFirstPersonCamera* sceneCamera = new CFirstPersonCamera();
+	sceneCamera->SetRotateButtons(true, false, false);
+	sceneCamera->SetDrag(true);
+	sceneCamera->SetEnableYAxisMovement(true);
+	sceneCamera->SetEnablePositionMovement(true);
+	sceneCamera->SetScalers(0.01f, 200.0f);
 
-	// maybe lights, you know.
+	sceneCamera->SetViewParams(&D3DXVECTOR3(500.0f, 160.0f, 0), &D3DXVECTOR3(500.0f, 0.0f, 500.0f));
 
+	sceneToBuild->SetCamera(sceneCamera);
+
+	// set sun constants ??
+	sceneToBuild->SetSun(&D3DXVECTOR3(600.0f, 500.0f, 500.0f), &D3DXVECTOR3(0.0f, -0.9f, 0.1f), &D3DXVECTOR4(0.0f,0.0f,0.0f,1.0f));
+
+	// maybe lights, you know, to see stuff?
+
+	return true;
 }
-w

@@ -3,7 +3,7 @@
 #include "Scene.h"
 
 // ================================================================================
-BaseSceneBuilder::BaseSceneBuilder(App* givenApp) :
+BaseSceneBuilder::BaseSceneBuilder(MainApp* givenApp) :
 sceneToBuild(NULL),
 parentApp(givenApp)
 {
@@ -23,7 +23,7 @@ Scene* BaseSceneBuilder::GetScene()
 }
 
 // ================================================================================
-App* BaseSceneBuilder::GetApp()
+MainApp* BaseSceneBuilder::GetApp()
 {
 	return parentApp;
 }

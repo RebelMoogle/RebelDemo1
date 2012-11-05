@@ -5,7 +5,7 @@
 bool BoxGeometry::mInitialized = false;
 
 BoxGeometry::BoxGeometry(const D3DXVECTOR3& position, const D3DXVECTOR3& scale, bool isStatic)
-	:BaseGeometry(),
+	:BaseGeometry(isStatic),
 	mPosition(position),
 	mScale(scale)
 {

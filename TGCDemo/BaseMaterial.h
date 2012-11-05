@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Shader.h"
+#include "ID3DResource.h"
 
 class Scene;
 
@@ -9,7 +10,7 @@ class Scene;
 /************************************************************************/
 
 
-class BaseMaterial
+class BaseMaterial : public ID3DDeviceResource
 {
 public:
 	BaseMaterial(void);

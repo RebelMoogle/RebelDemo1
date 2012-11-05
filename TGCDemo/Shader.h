@@ -31,8 +31,7 @@ namespace ShaderFactoryUtil
 		ID3D11VertexShader *shader = 0;
 		HRESULT hr = d3dDevice->CreateVertexShader(shaderBytecode, bytecodeLength, 0, &shader);
 		if (FAILED(hr)) {
-			// This shouldn't produce errors given proper bytecode, so a simple assert is fine
-			assert(false);
+			DXUT_ERR_MSGBOX(L"failed to create Vertex shader", hr);
 		}
 		return shader;
 	}
@@ -44,8 +43,7 @@ namespace ShaderFactoryUtil
 		ID3D11GeometryShader *shader = 0;
 		HRESULT hr = d3dDevice->CreateGeometryShader(shaderBytecode, bytecodeLength, 0, &shader);
 		if (FAILED(hr)) {
-			// This shouldn't produce errors given proper bytecode, so a simple assert is fine
-			assert(false);
+			DXUT_ERR_MSGBOX(L"failed to create Geometry shader", hr);
 		}
 		return shader;
 	}
@@ -57,8 +55,7 @@ namespace ShaderFactoryUtil
 		ID3D11PixelShader *shader = 0;
 		HRESULT hr = d3dDevice->CreatePixelShader(shaderBytecode, bytecodeLength, 0, &shader);
 		if (FAILED(hr)) {
-			// This shouldn't produce errors given proper bytecode, so a simple assert is fine
-			assert(false);
+			DXUT_ERR_MSGBOX(L"failed to create pixel shader", hr);
 		}
 		return shader;
 	}
@@ -70,8 +67,7 @@ namespace ShaderFactoryUtil
 		ID3D11ComputeShader *shader = 0;
 		HRESULT hr = d3dDevice->CreateComputeShader(shaderBytecode, bytecodeLength, 0, &shader);
 		if (FAILED(hr)) {
-			// This shouldn't produce errors given proper bytecode, so a simple assert is fine
-			assert(false);
+			DXUT_ERR_MSGBOX(L"failed to create compute shader", hr);
 		}
 		return shader;
 	}
@@ -104,7 +100,7 @@ public:
 
 		if (FAILED(hr)) {
 			// TODO: Define exception type and improve this error string, but the ODS will do for now
-			throw std::runtime_error("Error compiling shader");
+			DXUT_ERR_MSGBOX(L"failed to create compile shader", hr);
 		}
 
 

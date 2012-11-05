@@ -1,6 +1,6 @@
 #pragma once
 
-class App;
+class MainApp;
 class Scene;
 
 // Base class for scene builders.
@@ -11,7 +11,7 @@ class BaseSceneBuilder
 	public:
 
 		// Base constructor.
-		explicit BaseSceneBuilder(App*);
+		explicit BaseSceneBuilder(MainApp*);
 
 		// Destructor. Deletes the scene.
 		virtual ~BaseSceneBuilder();
@@ -23,7 +23,7 @@ class BaseSceneBuilder
 		Scene* GetScene();
 
 		// Gets the parent window.
-		App* GetApp();
+		MainApp* GetApp();
 
 	protected:
 
@@ -32,6 +32,6 @@ class BaseSceneBuilder
 
 	private:
 		// Parent App.
-		App* const parentApp;
+		MainApp* const parentApp;
 		
 };

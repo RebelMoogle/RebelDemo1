@@ -6,7 +6,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //--------------------------------------------------------------------------------------
 #include "DXUT.h"
+#include "MainApp.h"
 
+MainApp* gMainApp = 0;
 
 //--------------------------------------------------------------------------------------
 // Reject any D3D11 devices that aren't acceptable by returning false
@@ -33,7 +35,9 @@ bool CALLBACK ModifyDeviceSettings( DXUTDeviceSettings* pDeviceSettings, void* p
 HRESULT CALLBACK OnD3D11CreateDevice( ID3D11Device* pd3dDevice, const DXGI_SURFACE_DESC* pBackBufferSurfaceDesc,
                                       void* pUserContext )
 {
-    return S_OK;
+	if(gMainApp->D3DCreateDevice(pd3dDevice, pBackBufferSurfaceDesc))
+		return S_OK;
+	else return S_FALSE;
 }
 
 
@@ -43,7 +47,9 @@ HRESULT CALLBACK OnD3D11CreateDevice( ID3D11Device* pd3dDevice, const DXGI_SURFA
 HRESULT CALLBACK OnD3D11ResizedSwapChain( ID3D11Device* pd3dDevice, IDXGISwapChain* pSwapChain,
                                           const DXGI_SURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext )
 {
-    return S_OK;
+	if(gMainApp->D3DCreateSwapChain(pd3dDevice, pSwapChain, pBackBufferSurfaceDesc))
+		return S_OK;
+	else return S_FALSE;
 }
 
 
@@ -52,6 +58,7 @@ HRESULT CALLBACK OnD3D11ResizedSwapChain( ID3D11Device* pd3dDevice, IDXGISwapCha
 //--------------------------------------------------------------------------------------
 void CALLBACK OnFrameMove( double fTime, float fElapsedTime, void* pUserContext )
 {
+	gMainApp->Update(fElapsedTime);
 }
 
 
@@ -61,13 +68,15 @@ void CALLBACK OnFrameMove( double fTime, float fElapsedTime, void* pUserContext 
 void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext* pd3dImmediateContext,
                                   double fTime, float fElapsedTime, void* pUserContext )
 {
-    // Clear render target and the depth stencil 
-    float ClearColor[4] = { 0.176f, 0.196f, 0.667f, 0.0f };
+	D3D11_VIEWPORT viewport;
+	viewport.Width = static_cast<float>(DXUTGetDXGIBackBufferSurfaceDesc()->Width);
+	viewport.Height = static_cast<float>(DXUTGetDXGIBackBufferSurfaceDesc()->Height);
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
 
-    ID3D11RenderTargetView* pRTV = DXUTGetD3D11RenderTargetView();
-    ID3D11DepthStencilView* pDSV = DXUTGetD3D11DepthStencilView();
-    pd3dImmediateContext->ClearRenderTargetView( pRTV, ClearColor );
-    pd3dImmediateContext->ClearDepthStencilView( pDSV, D3D11_CLEAR_DEPTH, 1.0, 0 );
+	gMainApp->Render(pd3dDevice, pd3dImmediateContext, &viewport, fElapsedTime);
 }
 
 
@@ -76,6 +85,8 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 //--------------------------------------------------------------------------------------
 void CALLBACK OnD3D11ReleasingSwapChain( void* pUserContext )
 {
+	if (gMainApp)
+		gMainApp->D3DReleaseSwapChain();
 }
 
 
@@ -84,6 +95,8 @@ void CALLBACK OnD3D11ReleasingSwapChain( void* pUserContext )
 //--------------------------------------------------------------------------------------
 void CALLBACK OnD3D11DestroyDevice( void* pUserContext )
 {
+	if (gMainApp)
+		gMainApp->D3DReleaseDevice();
 }
 
 
@@ -93,6 +106,9 @@ void CALLBACK OnD3D11DestroyDevice( void* pUserContext )
 LRESULT CALLBACK MsgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam,
                           bool* pbNoFurtherProcessing, void* pUserContext )
 {
+	if(gMainApp)
+		gMainApp->HandleMessages(hWnd, uMsg, wParam, lParam);
+
     return 0;
 }
 
@@ -154,6 +170,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
     DXUTSetCallbackD3D11DeviceDestroyed( OnD3D11DestroyDevice );
 
     // Perform any application-level initialization here
+	gMainApp = new MainApp();
 
     DXUTInit( true, true, NULL ); // Parse the command line, show msgboxes on error, no extra command line params
     DXUTSetCursorSettings( true, true ); // Show the cursor and clip it when in full screen
@@ -164,6 +181,7 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
     DXUTMainLoop(); // Enter into the DXUT render loop
 
     // Perform any application-level cleanup here
+	SAFE_DELETE(gMainApp);
 
     return DXUTGetExitCode();
 }

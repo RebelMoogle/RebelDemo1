@@ -1,21 +1,17 @@
 ### Current: ###
 
-- moving camera (copy from rebelcraft?) - saturday
- x- CFirstPersonCamea from DXUTCamera
- - set constant buffer from camera data
- - set constant buffer in shader.
- - simple rendering shader.
-
-- render testbox in middle - sat
-	x- make box geometry
-	- create testScene
+- Renderer 2 - 3 hours		sunday
+	x- Deferred rendering 1.5 hour
+	 x- shader 
+		x- Worldgeometry -> GBuffer -> ParicleSystem -> combine Particles and GBuffer on final render
+		- combination shader
+		- Splat Particles onto final.
+	- TextureToScreen 30 min
+	 - shader
 
 ### Next: ###
 
-- integrate new classes into program. saturday
-	- call all the methods! -> particle system
-
-- Particle System	saturday
+- Particle System Saturday
 	- Geometry Shaders (swap buffer approach) 2 hours.
 	- create real particle buffer
 	- write geometry shader - buffer swap
@@ -27,20 +23,6 @@
 		- multiple particles (spawn rate)
 		- limit
 
-
-- Renderer 2 - 3 hours		sunday
-	- Deferred rendering 1.5 hour
-	 - shader 
-		- Worldgeometry -> GBuffer -> ParicleSystem -> combine Particles and GBuffer on final render
-		- Splat Particles onto final.
-	- TextureToScreen 30 min
-	 - shader
-
-
-
-- TestScene 1.5 hours		sunday
-	- Block
-	- Plane
 
 - Particle System Lines		sunday/monday
 - Particle System Swirls (Flower / Tree) monday
@@ -67,6 +49,17 @@
 
 
 ########### Done: ############
+
+
+- render testbox in middle - sat
+	x- make box geometry
+	x- create testScene
+
+- moving camera (copy from rebelcraft?) - saturday
+ x- CFirstPersonCamea from DXUTCamera
+ x- set constant buffer from camera data
+ x- set constant buffer in shader.
+ x- simple rendering shader.
 
 - Particle System 2-3 hours
 	- set up D3D cpu side for rendering

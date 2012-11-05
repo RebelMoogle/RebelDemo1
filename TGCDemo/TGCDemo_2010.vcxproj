@@ -395,6 +395,7 @@
     <ClInclude Include="constants.h" />
     <ClInclude Include="DefaultMaterial.h" />
     <ClInclude Include="GeometryInstance.h" />
+    <ClInclude Include="ID3DResource.h" />
     <ClInclude Include="MainApp.h" />
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="Shader.h" />
@@ -424,9 +425,13 @@
     <ClCompile Include="DXUT\Optional\SDKmesh.cpp" />
     <ClCompile Include="DXUT\Optional\SDKmisc.cpp" />
     <None Include="Media\Particle1.png" />
+    <None Include="Shaders\CraftMyGBuffer.hlsl" />
+    <None Include="Shaders\DeferredShade.hlsl" />
+    <None Include="Shaders\DiffuseMaterial.hlsl" />
     <None Include="Shaders\GPUParticles.hlsl">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="Shaders\OmniMaterial.hlsl" />
     <None Include="Shaders\ParticleSystem.hlsl" />
     <None Include="Shaders\RenderParticles.hlsl" />
     <None Include="Shaders\ShaderConstants.hlsl">
@@ -438,6 +443,7 @@
     <None Include="Shaders\TextureToScreen.hlsl">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="Shaders\ToneMapping.hlsl" />
     <None Include="ToDo.txt" />
   </ItemGroup>
   <ItemGroup>

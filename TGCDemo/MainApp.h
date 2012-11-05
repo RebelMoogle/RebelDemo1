@@ -16,7 +16,9 @@
 #include "Scene.h"
 #include "ConstantBuffer.h"
 
-class MainApp
+class BaseSceneBuilder;
+
+class MainApp 
 {
 public:
 	MainApp(void);
@@ -39,13 +41,19 @@ public:
 	bool D3DCreateSwapChain(ID3D11Device* Device, IDXGISwapChain* SwapChain, const DXGI_SURFACE_DESC* BackBufferSurfaceDesc);
 	void D3DReleaseSwapChain();
 
+	ID3D11InputLayout* mPositionTexCoordLayout;
+
 private:
 
-	CFirstPersonCamera* mViewerCamera;
-	ConstantBuffer<CameraConstants>* cameraCBuffer;
+	void InitScene();
 
+	BaseSceneBuilder* sceneBuilder;
 
 	Scene* currentScene;
-	//include SceneBuilder?
+
+	ID3D11RasterizerState* mWireRasterizerState;
+	ID3D11RasterizerState* mNoDepthRasterizerState;
+
+	ID3D11DepthStencilState* mDefaultDepthState;
 };
 

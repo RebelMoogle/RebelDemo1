@@ -1,17 +1,21 @@
 #pragma once
+#include "ID3DResource.h"
 /************************************************************************/
 /* Geometry type Definiton                                              */
 /************************************************************************/
 
 
-class BaseGeometry
+class BaseGeometry : public ID3DDeviceResource
 {
 public:
-	explicit BaseGeometry(void);
+	explicit BaseGeometry(bool isItStatic);
 	virtual ~BaseGeometry(void);
 
 	void Bind(ID3D11DeviceContext* ImmediateContext);
 	void Render(ID3D11DeviceContext* ImmediateContext);
+
+	bool IsStatic() const;
+	void SetStatic(bool isItStatic);
 
 protected:
 
@@ -31,5 +35,7 @@ protected:
 	D3D11_PRIMITIVE_TOPOLOGY mTopology;
 	// Format of the elements in the index buffer.
 	DXGI_FORMAT mIndexFormat;
+
+	bool mIsStatic;
 };
 

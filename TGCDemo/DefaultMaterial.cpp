@@ -1,11 +1,11 @@
 #include "DXUT.h"
 #include "DefaultMaterial.h"
 
-bool OmniMaterial::isInitialized = false;
+bool DefaultMaterial::isInitialized = false;
 
 DefaultMaterial::DefaultMaterial(const D3DXVECTOR4& diffuse, const D3DXVECTOR4& specular, const D3DXVECTOR4& transmissive)
 {
-	omniCBuffer = new ConstantBuffer<OmniConstants>();
+	omniCBuffer = new ConstantBuffer<DefaultConstants>();
 	omniCBuffer->Data.diffuseColor = diffuse;
 	omniCBuffer->Data.specularColor = specular;
 	omniCBuffer->Data.transmissive = transmissive;
@@ -26,10 +26,10 @@ void DefaultMaterial::BindParams( ID3D11DeviceContext* ImmediateContext )
 
 bool DefaultMaterial::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_DESC* BackBufferSurfaceDesc )
 {
-	materialVS = new VertexShader(d3dDevice, L"Shaders\\OmniMaterial.hlsl", "OmniMaterialVS");
-	materialPS = new PixelShader(d3dDevice, L"Shaders\\OmniMaterial.hlsl", "OmniMaterialPS");
+	materialVS = new VertexShader(Device, L"Shaders\\OmniMaterial.hlsl", "OmniMaterialVS");
+	materialPS = new PixelShader(Device, L"Shaders\\OmniMaterial.hlsl", "OmniMaterialPS");
 
-	if(!omniCBuffer->D3DCreateDevice(d3dDevice, BackBufferSurfaceDesc)) return false;
+	if(!omniCBuffer->D3DCreateDevice(Device, BackBufferSurfaceDesc)) return false;
 
 	// Create  mesh input layout
 	// isn't there an easier and better way to do this???
@@ -50,7 +50,7 @@ bool DefaultMaterial::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_
 		{ "NORMAL",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	d3dDevice->CreateInputLayout( 
+	Device->CreateInputLayout( 
 		layout, ARRAYSIZE(layout), 
 		bytecode->GetBufferPointer(),
 		bytecode->GetBufferSize(), 
