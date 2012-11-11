@@ -42,6 +42,7 @@ float3 PhongShade(float3 position, float3 normal, float3 kDiffuse, float3 kSpecu
 	float	cosThetaI = saturate(dot(normal, -lightDirection));
 	outgoingRadiance = (kDiffuse + kSpecular * pow(cosThetaH, specularExponent)) * lightPower.rgb * cosThetaI;
 
+	//return float3(cosThetaH, cosThetaI, 0);
 	return outgoingRadiance;
 }
 
@@ -63,7 +64,7 @@ GSPS_INPUT DeferredShadeVS( VS_INPUT input )
 	return output;
 }
 
-// computes a soft shadow
+/******  no compute shadow for now. // computes a soft shadow
 float ComputeShadow(float4 worldPosition)
 {
 	float4 lightScreenPosition = mul(worldPosition, lightWorldViewProj);
@@ -130,6 +131,8 @@ float ComputeShadow(float4 worldPosition)
 	return (1- fPercentLit / numPixels );
 }
 
+no compute shadow end!*/
+
 //--------------------------------------------------------------------------------------
 // Pixel Shader - SPOTLIGHT
 //--------------------------------------------------------------------------------------
@@ -171,8 +174,8 @@ float4 DeferredShadePS( GSPS_INPUT input) : SV_Target
 
 		result.rgb = PhongShade( wsPosition, normal, kDiffuse, kSpecular,  specularColor.a, lightToWSPosition) * 100.0f;
 		
-		result.rgb = result.rgb * clamp(ComputeShadow(wsPosition), 0.0f, 1.0f);
-		//return result;	
+		//result.rgb = result.rgb* clamp(ComputeShadow(wsPosition), 0.0f, 1.0f);
+		return result;	
 	}
 	else
 	 result.rgb *= 0.0f;
@@ -206,15 +209,16 @@ float4 DeferredSunShadePS( GSPS_INPUT input) : SV_Target
 	float3 kSpecular = ((specularColor.a + 8) / 8*PI) * specularColor.rgb;
 
 	result.rgb = PhongShade( wsPosition, normal, kDiffuse, kSpecular,  specularColor.a, lightDirectionDistance.xyz) * 100.0f;
-	if(cosAngleNormLight > 0.0f)
-	{
-		//result.rgb = result.rgb * clamp(ComputeShadow(wsPosition), 0.0f, 1.0f);
-		return result;	
-	}
-	result.rgb = clamp(cosAngleNormLight, 0.1f, 1.0f) * result.rgb;
+	//if(cosAngleNormLight > 0.0f)
+	//{
+	//	//result.rgb = result.rgb * clamp(ComputeShadow(wsPosition), 0.0f, 1.0f);
+	//	return result;	
+	//}
+	//result.rgb = clamp(cosAngleNormLight, 0.1f, 1.0f) * result.rgb;
 
+	//return float4(cameraPosition,1);
 	return result;
-	//return float4( ComputeShadow(wsPosition), 0, 0, 1.0);
+	//return float4( specularColor.a, 0, 0, 1.0);
 }
 
 

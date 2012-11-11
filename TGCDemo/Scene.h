@@ -55,7 +55,7 @@ public:
 	void HandleMessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void Move( float elapsedTime );
 
-	void SetSun(D3DXVECTOR3* Position, D3DXVECTOR3* Direction, D3DXVECTOR4* Power);
+	void SetSun(D3DXVECTOR3 Position, D3DXVECTOR3 Direction, D3DXVECTOR4 Power);
 
 private:
 
@@ -64,6 +64,11 @@ private:
 	// !camera constant buffer needs to be set before calling RenderGBuffer!
 	void RenderGBuffer(ID3D11DeviceContext* d3dDeviceContext, const D3D11_VIEWPORT* givenViewport);
 	void RenderLightGBuffer(ID3D11DeviceContext*, const D3D11_VIEWPORT* lightViewPorts);
+
+	void ToneMapping(ID3D11DeviceContext* d3dDeviceContext, ID3D11ShaderResourceView* inputRender, ID3D11Buffer* quadVertices);
+	
+	VertexShader* toneMappingVS;
+	PixelShader*  toneMappingPS;
 
 	// Parent App.
 	MainApp* const parentApp;

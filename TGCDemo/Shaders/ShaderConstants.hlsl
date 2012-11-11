@@ -7,6 +7,15 @@
 
 #define PI 3.141592653589793238
 
+#define ambientColor float3(0.1,0.1,0.1)
+
+#define luminanceMax 40.0f
+#define GAMMA (1.1f/2.2f)
+
+#define DepthBias 8.0f
+#define	kernelSize 2
+#define shadowRange 0.32f
+
 // #### Particles #####
 
 // particle constants

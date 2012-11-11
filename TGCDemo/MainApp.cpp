@@ -7,6 +7,7 @@
 MainApp::MainApp(void)
 {
 	InitScene();
+	mTextureToScreenCBuffer = new ConstantBuffer<TextureToScreenConstants>();
 }
 
 
@@ -23,6 +24,30 @@ MainApp::~MainApp(void)
 
 bool MainApp::D3DCreateDevice( ID3D11Device* d3dDevice, const DXGI_SURFACE_DESC* BackBufferSurfaceDesc )
 {
+	//render Texture To Screen
+	mTextureToScreenVS = new VertexShader(d3dDevice, L"Shaders\\TextureToScreen.hlsl", "TextureToScreenVS");
+	mTextureToScreenGS = new GeometryShader(d3dDevice, L"Shaders\\TextureToScreen.hlsl", "TextureToScreenGS");
+	mTextureToScreenPS = new PixelShader(d3dDevice, L"Shaders\\TextureToScreen.hlsl", "TextureToScreenPS");
+
+	// Create  texture to screen input layout
+	{
+		ID3D10Blob *bytecode = mTextureToScreenVS->GetByteCode();
+
+
+		const D3D11_INPUT_ELEMENT_DESC layout[] =
+		{
+			{"POSITION",  0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"TEXCOORD",  0, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		};
+
+		d3dDevice->CreateInputLayout( 
+			layout, ARRAYSIZE(layout), 
+			bytecode->GetBufferPointer(),
+			bytecode->GetBufferSize(), 
+			&mPositionTexCoordLayout);
+	}
+	
+	
 	// Create standard rasterizer state
 	{
 		CD3D11_RASTERIZER_DESC desc(D3D11_DEFAULT);
@@ -48,6 +73,34 @@ bool MainApp::D3DCreateDevice( ID3D11Device* d3dDevice, const DXGI_SURFACE_DESC*
 		d3dDevice->CreateDepthStencilState(&desc, &mDefaultDepthState);
 	}
 
+	// ### Render Texture To Screen Buffer and Vertex Buffer
+	{
+		mTextureToScreenCBuffer->D3DCreateDevice(d3dDevice, BackBufferSurfaceDesc);
+		mTextureToScreenCBuffer->Data.mDestRect = D3DXVECTOR4(0, 0, 1, 1);
+
+		// create vertices
+		// the full QUAD will be created in the Geometry shader, we only need the upper left corner.
+		PositionTexCoordVertex vertices[] =
+		{
+			{ D3DXVECTOR3( -1.0f, 1.0f, 0.5f), D3DXVECTOR2(0.0f, 0.0f) },
+		};
+
+		D3D11_BUFFER_DESC bd;
+		ZeroMemory( &bd, sizeof(bd) );
+		bd.Usage = D3D11_USAGE_DEFAULT;
+		bd.ByteWidth = sizeof( PositionTexCoordVertex );
+		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		bd.CPUAccessFlags = 0;
+		bd.MiscFlags = 0;
+		bd.StructureByteStride = 0;
+		D3D11_SUBRESOURCE_DATA InitData;
+		ZeroMemory( &InitData, sizeof(InitData) );
+		InitData.pSysMem = vertices;
+		InitData.SysMemPitch = 0;
+		InitData.SysMemSlicePitch = 0;
+		d3dDevice->CreateBuffer( &bd, &InitData, &mTextureToScreenVertexBuffer );
+	}
+
 	if(!sceneBuilder->GetScene()->D3DCreateDevice(d3dDevice, BackBufferSurfaceDesc))
 		DXUT_ERR_MSGBOX(L"Scene D3D device not created", S_FALSE);
 
@@ -56,14 +109,16 @@ bool MainApp::D3DCreateDevice( ID3D11Device* d3dDevice, const DXGI_SURFACE_DESC*
 void MainApp::D3DReleaseDevice()
 {
 	sceneBuilder->GetScene()->D3DReleaseDevice();
+	mTextureToScreenCBuffer->D3DReleaseDevice();
+	SAFE_DELETE(mTextureToScreenCBuffer);
+	SAFE_RELEASE(mTextureToScreenVertexBuffer);
+	SAFE_DELETE(mTextureToScreenVS);
+	SAFE_DELETE(mTextureToScreenGS);
+	SAFE_DELETE(mTextureToScreenPS);
 }
 
 bool MainApp::D3DCreateSwapChain( ID3D11Device* Device, IDXGISwapChain* SwapChain, const DXGI_SURFACE_DESC* BackBufferSurfaceDesc )
 {
-	DXGI_SAMPLE_DESC sampleDesc;
-	sampleDesc.Count = 1;
-	sampleDesc.Quality = 0;
-
 
 	sceneBuilder->GetScene()->D3DCreateSwapChain(Device, SwapChain, BackBufferSurfaceDesc);
 
@@ -98,6 +153,45 @@ void MainApp::InitScene()
 {
 	sceneBuilder = new TestSceneBuilder(this);
 	if (!sceneBuilder->Init()) return;
+}
+
+void MainApp::RenderTextureToScreen( ID3D11DeviceContext* d3dDeviceContext, ID3D11RenderTargetView* backBuffer, D3DXVECTOR4* destRectangle, /* const UIConstants* ui, */ ID3D11ShaderResourceView* textureSRV )
+{
+	
+	mTextureToScreenCBuffer->Data.mDestRect = *destRectangle;
+	mTextureToScreenCBuffer->UpdateBuffer(d3dDeviceContext);
+	ID3D11Buffer* tempTexToScreenCB = mTextureToScreenCBuffer->GetBuffer();
+
+
+	d3dDeviceContext->IASetInputLayout(mPositionTexCoordLayout);
+	// Set vertex buffer
+	UINT stride = sizeof( PositionTexCoordVertex );
+	UINT offset = 0;
+	d3dDeviceContext->IASetVertexBuffers( 0, 1, &mTextureToScreenVertexBuffer, &stride, &offset );
+	d3dDeviceContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_POINTLIST );
+
+	d3dDeviceContext->VSSetShader(mTextureToScreenVS->GetShader(), NULL, 0 );
+	d3dDeviceContext->VSSetConstantBuffers(2, 1, &tempTexToScreenCB);
+
+	d3dDeviceContext->GSSetShader(mTextureToScreenGS->GetShader(), NULL, 0);
+	d3dDeviceContext->GSSetConstantBuffers(2, 1, &tempTexToScreenCB);
+
+	d3dDeviceContext->PSSetShader( mTextureToScreenPS->GetShader(), NULL, 0 );
+	d3dDeviceContext->PSSetShaderResources( 0, 1, &textureSRV );
+	//d3dDeviceContext->PSSetSamplers( 0, 1, &mDiffuseSampler );
+
+	//d3dDeviceContext->OMSetDepthStencilState(mDepthState, 0);
+	d3dDeviceContext->OMSetRenderTargets(1, &backBuffer, NULL);
+	//d3dDeviceContext->RSSetState(mRasterizerState);
+	d3dDeviceContext->Draw(1, 0);
+
+	d3dDeviceContext->OMSetRenderTargets(0, 0, 0);
+	ID3D11ShaderResourceView* pSRV = {NULL};
+	d3dDeviceContext->PSSetShaderResources(0, 1, &pSRV);
+	
+	//SAFE_RELEASE(tempTexToScreenCB);
+	//SAFE_RELEASE(pSRV);
+
 }
 
 

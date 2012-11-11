@@ -1,6 +1,5 @@
 #pragma once
-#include "BaseGeometry.h"
-#include "BaseMaterial.h"
+
 
 /************************************************************************/
 /* Geometry Instance manangement
@@ -8,6 +7,10 @@
 
 */
 /************************************************************************/
+
+class BaseGeometry;
+class BaseMaterial;
+class Scene;
 
 class GeometryInstance
 {
@@ -22,13 +25,16 @@ public:
 	const D3DXMATRIX& GetTransform() const;
 	
 	void SetTransform( D3DXMATRIX* newTransform );
+	float GetAngle();
+	void SetAngle(float);
 
 private:
 
-	BaseGeometry* _Geometry;
-	BaseMaterial* _Material;
-	Scene* _Scene;
+	BaseGeometry* mGeometry;
+	BaseMaterial* mMaterial;
+	Scene* mScene;
 
 	D3DXMATRIX mTransform;
+	float mAngle;
 };
 

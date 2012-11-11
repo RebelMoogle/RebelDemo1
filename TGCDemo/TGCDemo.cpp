@@ -7,8 +7,26 @@
 //--------------------------------------------------------------------------------------
 #include "DXUT.h"
 #include "MainApp.h"
+#include "SDKmisc.h"
 
 MainApp* gMainApp = 0;
+bool gDisplayUI = false;
+
+//-------------------------------------------------------------------------------------
+// Forward Declarations
+//-------------------------------------------------------------------------------------
+bool CALLBACK IsD3D11DeviceAcceptable( const CD3D11EnumAdapterInfo *AdapterInfo, UINT Output, const CD3D11EnumDeviceInfo *DeviceInfo, DXGI_FORMAT BackBufferFormat, bool bWindowed, void* pUserContext );
+HRESULT CALLBACK OnD3D11CreateDevice( ID3D11Device* pd3dDevice, const DXGI_SURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext );
+HRESULT CALLBACK OnD3D11ResizedSwapChain( ID3D11Device* pd3dDevice, IDXGISwapChain* pSwapChain, const DXGI_SURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext );
+void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext* pd3dImmediateContext, double fTime, float fElapsedTime, void* pUserContext );
+void CALLBACK OnD3D11ReleasingSwapChain( void* pUserContext );
+void CALLBACK OnD3D11DestroyDevice( void* pUserContext );
+
+LRESULT CALLBACK MsgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, bool* pbNoFurtherProcessing, void* pUserContext );
+void CALLBACK OnKeyboard( UINT nChar, bool bKeyDown, bool bAltDown, void* pUserContext );
+void CALLBACK OnFrameMove( double fTime, float fElapsedTime, void* pUserContext );
+bool CALLBACK ModifyDeviceSettings( DXUTDeviceSettings* pDeviceSettings, void* pUserContext );
+
 
 //--------------------------------------------------------------------------------------
 // Reject any D3D11 devices that aren't acceptable by returning false
@@ -25,6 +43,21 @@ bool CALLBACK IsD3D11DeviceAcceptable( const CD3D11EnumAdapterInfo *AdapterInfo,
 //--------------------------------------------------------------------------------------
 bool CALLBACK ModifyDeviceSettings( DXUTDeviceSettings* pDeviceSettings, void* pUserContext )
 {
+	static bool firstTime = true;
+	if (firstTime)
+	{
+		firstTime = false;
+		if (pDeviceSettings->d3d11.DriverType == D3D_DRIVER_TYPE_REFERENCE)
+		{
+			DXUTDisplaySwitchingToREFWarning(pDeviceSettings->ver);
+		}
+	}
+
+	pDeviceSettings->d3d11.sd.SampleDesc.Count = 1;
+	pDeviceSettings->d3d11.sd.SampleDesc.Quality = 0;
+
+	pDeviceSettings->d3d11.AutoCreateDepthStencil = true;
+
     return true;
 }
 
@@ -97,6 +130,8 @@ void CALLBACK OnD3D11DestroyDevice( void* pUserContext )
 {
 	if (gMainApp)
 		gMainApp->D3DReleaseDevice();
+
+	//DXUTGetGlobalResourceCache().OnDestroyDevice();
 }
 
 
@@ -174,10 +209,11 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 
     DXUTInit( true, true, NULL ); // Parse the command line, show msgboxes on error, no extra command line params
     DXUTSetCursorSettings( true, true ); // Show the cursor and clip it when in full screen
+	DXUTSetHotkeyHandling(true, true, false);
     DXUTCreateWindow( L"TGCDemo" );
 
     // Only require 10-level hardware
-    DXUTCreateDevice( D3D_FEATURE_LEVEL_11_0, true, 1280, 1024 );
+    DXUTCreateDevice( D3D_FEATURE_LEVEL_11_0, true, 1024, 768 );
     DXUTMainLoop(); // Enter into the DXUT render loop
 
     // Perform any application-level cleanup here

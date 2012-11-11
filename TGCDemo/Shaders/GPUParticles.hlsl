@@ -16,14 +16,25 @@
 
 struct VS_PARTICLE
 {
-	float3 position          : POSITION;
-	float duration			 : DURATION;   
+	float3 position     : POSITION;
+	float3 direction	: DIRECTION;
+	float duration		: DURATION;
+	float spawn			: SPAWN;
+	float speed			: SPEED;
+	float rotation		: ROTATION;
+	bool alive			: ALIVE;
+	  
 };
 
 struct GS_PARTICLE
 {
 	float3 position	: SV_POSITION;
-	float  duration	: DURATION;
+	float3 direction	: DIRECTION;
+	float duration		: DURATION;
+	float spawn			: SPAWN;
+	float speed			: SPEED;
+	float rotation		: ROTATION;
+	bool alive			: ALIVE;
 };
 
 // Need Depth and Blend States?
@@ -52,6 +63,15 @@ void ParticleSystemGS( point GS_PARTICLE input[1], inout PointStream<GS_PARTICLE
 
 	// if particle empty (duration <= 0 ) check if new ones need to be created (spawn rate), 
 	//											else: skip
+	
+	duration = duration - delta;
+	if(duration <= 0)
+	{
+		alive = !alive;
+
+		// duration = random value ( lifetime / time until spawn )
+		// duration = alive * durationRange + (!alive) * spawnRange;
+	}
 	
 	//TODO compute and output a quad from given position and drawSize
 	//upper left

@@ -41,6 +41,9 @@ PS_INPUT ToneMappingVS( VS_INPUT input )
 //--------------------------------------------------------------------------------------
 float4 ToneMappingPS( PS_INPUT input) : SV_Target
 {
+	//TEST
+	//return float4(1,0,0,1);
+
 	// generate mipmaps, use lowest level for luminance value
 	// adjust tonemapping values accordingly
 	float4 result = float4(gDisplayTex.SampleLevel(defaultSampler, input.Tex, 0).rgb, 1);	

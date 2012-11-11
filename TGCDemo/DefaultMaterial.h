@@ -14,7 +14,7 @@ class DefaultMaterial :
 	public BaseMaterial
 {
 public:
-	DefaultMaterial(const D3DXVECTOR4& diffuse = D3DXVECTOR4(1.0f,1.0f,1.0f, 1.0f), const D3DXVECTOR4& specular = D3DXVECTOR4(1.0f,1.0f,1.0f, 1.0f), const D3DXVECTOR4& transmissive = D3DXVECTOR4(0.0f,0.0f,0.0f, RefractIdx_Vacuum));
+	DefaultMaterial(const D3DXVECTOR4& diffuse = D3DXVECTOR4(1.0f,1.0f,1.0f, 1.0f), const D3DXVECTOR4& specular = D3DXVECTOR4(1.0f,1.0f,1.0f, SPECULAR_EXP), const D3DXVECTOR4& transmissive = D3DXVECTOR4(0.0f,0.0f,0.0f, RefractIdx_Vacuum));
 	~DefaultMaterial(void);
 
 	// Binds effect parameters.

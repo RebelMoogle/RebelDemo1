@@ -1,8 +1,8 @@
 #pragma once
 // here are some constants
 
-#define CAMERA_NEAR 1.0f
-#define CAMERA_FAR 2000.0f
+#define CAMERA_NEAR 0.1f
+#define CAMERA_FAR 5000.0f
 
 #define RefractIdx_Vacuum 1.0f
 #define RefractIdx_Air 1.000292f
@@ -11,6 +11,8 @@
 #define RefractIdx_FusedQuartz 1.46f
 #define RefractIdx_Glass 2.0f
 #define RefractIdx_Diamond 2.42f
+
+#define SPECULAR_EXP 1.0f
 
 struct PositionTexCoordVertex
 {

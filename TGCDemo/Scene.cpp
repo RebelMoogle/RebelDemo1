@@ -1,5 +1,7 @@
 #include "DXUT.h"
 #include "Scene.h"
+#include "BaseGeometry.h"
+#include "BaseMaterial.h"
 
 
 Scene::Scene(MainApp* givenApp) :
@@ -8,6 +10,8 @@ parentApp(givenApp)
 		mGeometries.clear();
 		mMaterials.clear();
 		mGeometryInstances.clear();
+		mViewerCamera = new CFirstPersonCamera();
+		cameraCBuffer = new ConstantBuffer<CameraConstants>();
 }
 
 
@@ -112,7 +116,6 @@ bool Scene::D3DCreateDevice(ID3D11Device* Device, const DXGI_SURFACE_DESC* BackB
 
 	// Create deferred shade (direct light) blend state
 	{
-		// splat photon blend state
 		CD3D11_BLEND_DESC* blendDesc = new CD3D11_BLEND_DESC();
 		blendDesc->AlphaToCoverageEnable = false;
 		blendDesc->IndependentBlendEnable = false;
@@ -131,9 +134,9 @@ bool Scene::D3DCreateDevice(ID3D11Device* Device, const DXGI_SURFACE_DESC* BackB
 
 
 		HRESULT hr = Device->CreateBlendState(blendDesc, &mDeferredShadeBlend);
-		if (FAILED(hr)) {
+		if (FAILED(hr)) 
 			DXUT_ERR_MSGBOX(L"failed to create deferred shade blend state", hr);
-		}
+		
 	}
 
 	cameraCBuffer->D3DCreateDevice(Device, BackBufferSurfaceDesc);
@@ -205,6 +208,10 @@ bool Scene::D3DCreateDevice(ID3D11Device* Device, const DXGI_SURFACE_DESC* BackB
 		Device->CreateBuffer(&constantbd, &ConstInitData, &lightCBuffer);
 	}
 
+	// ### tone mapping shader
+	toneMappingVS = new VertexShader(Device, L"Shaders\\ToneMapping.hlsl", "ToneMappingVS");
+	toneMappingPS = new PixelShader(Device, L"Shaders\\ToneMapping.hlsl", "ToneMappingPS");
+
 	return true;
 }
 
@@ -214,7 +221,21 @@ void Scene::D3DReleaseDevice()
 		(*it)->D3DReleaseDevice();
 	for (std::vector<BaseMaterial*>::iterator it = mMaterials.begin(); it != mMaterials.end(); ++it)
 		(*it)->D3DReleaseDevice();
+	for (std::vector<ID3D11Texture2D*>::iterator it = mGBuffer.begin(); it != mGBuffer.end(); ++it)
+	{
+		SAFE_RELEASE((*it));
+	}
+	for (std::vector<ID3D11RenderTargetView*>::iterator it = mGBufferRTV.begin(); it != mGBufferRTV.end(); ++it)
+	{
+		SAFE_RELEASE((*it));
+	}
+	for (std::vector<ID3D11ShaderResourceView*>::iterator it = mGBufferSRV.begin(); it != mGBufferSRV.end(); ++it)
+	{
+		SAFE_RELEASE((*it));
+	}
 
+	cameraCBuffer->D3DReleaseDevice();
+	SAFE_DELETE(cameraCBuffer);
 	SAFE_DELETE(mViewerCamera);
 
 	SAFE_RELEASE(mMeshVertexLayout);
@@ -233,16 +254,34 @@ void Scene::D3DReleaseDevice()
 	SAFE_DELETE(DeferredSunShadePS);
 	//SAFE_RELEASE(shadowSampler);
 
+	
+	SAFE_RELEASE(splattingTexture);
 	SAFE_RELEASE(splattingRTV);
 	SAFE_RELEASE(splattingSRV);
+	SAFE_DELETE(toneMappingPS);
+	SAFE_DELETE(toneMappingVS);
+	SAFE_RELEASE(screenQuadVertices);
+	SAFE_RELEASE(lightCBuffer);
+	
 }
 
 // ================================================================================
 bool Scene::D3DCreateSwapChain(ID3D11Device* d3dDevice, IDXGISwapChain* SwapChain, const DXGI_SURFACE_DESC* BackBufferSurfaceDesc)
 {
 	if (mViewerCamera)
+	{
 		mViewerCamera->SetProjParams(D3DX_PI / 4, (float)BackBufferSurfaceDesc->Width / (float)BackBufferSurfaceDesc->Height, CAMERA_NEAR, CAMERA_FAR);
+		
+		D3DXMATRIX identityMatrix;
+		D3DXMatrixIdentity(&identityMatrix);
+		
+		cameraCBuffer->Data.World	= identityMatrix;
+		cameraCBuffer->Data.refractiveIndexETA = 1.0f;
+		cameraCBuffer->Data.View	= *mViewerCamera->GetViewMatrix();
+		cameraCBuffer->Data.cameraPosition = *mViewerCamera->GetEyePt();
+		cameraCBuffer->Data.WorldViewProjection = identityMatrix * cameraCBuffer->Data.View * (*mViewerCamera->GetProjMatrix());
 
+	}
 	mGBufferWidth = BackBufferSurfaceDesc->Width;
 	mGBufferHeight = BackBufferSurfaceDesc->Height;
 
@@ -467,10 +506,21 @@ void Scene::Render(ID3D11DeviceContext* ImmediateContext, const D3D11_VIEWPORT* 
 
 	ImmediateContext->ClearDepthStencilView(pDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	// put together particle system and gbuffer stuff
+	// put together particle system and gbuffer stuff //get data from splattingRTV or Gbuffer RTVs, bind as SRVs.
 
 	// call tonemapping
+	ImmediateContext->ClearDepthStencilView(pDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	ImmediateContext->RSSetState(mRasterizerState);
+	ToneMapping(ImmediateContext, splattingSRV, screenQuadVertices);
 
+	//parentApp->RenderTextureToScreen(ImmediateContext, pRTV, new D3DXVECTOR4(0.1f,-0.1f,0.6f,- (0.6f)), mGBufferSRV[0]); //specular
+	//parentApp->RenderTextureToScreen(ImmediateContext, pRTV, new D3DXVECTOR4(0.1f,-0.71f,0.6f,- (0.6f)), mGBufferSRV[1]); //diffuse
+	//parentApp->RenderTextureToScreen(ImmediateContext, pRTV, new D3DXVECTOR4(0.1f,-1.31f,0.6f,- (0.6f)), splattingSRV); //transmissive
+	//parentApp->RenderTextureToScreen(ImmediateContext, pRTV, new D3DXVECTOR4(0.7f,-0.1f,0.6f,- (0.6f)), mGBufferSRV[3]); //normal
+	//parentApp->RenderTextureToScreen(ImmediateContext, pRTV, new D3DXVECTOR4(0.7f,-0.71f,0.6f,- (0.6f)), mGBufferSRV[4]); //position
+
+
+	//SAFE_RELEASE(tempCameraCBuffer);
 }
 
 void Scene::HandleMessages( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
@@ -481,6 +531,17 @@ void Scene::HandleMessages( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 void Scene::Move( float elapsedTime )
 {
 	mViewerCamera->FrameMove(elapsedTime);
+
+	D3DXMATRIX identityMatrix;
+	D3DXMatrixIdentity(&identityMatrix);
+
+	cameraCBuffer->Data.World	= identityMatrix;
+	cameraCBuffer->Data.refractiveIndexETA = 1.0f;
+	cameraCBuffer->Data.View	= *mViewerCamera->GetViewMatrix();
+	cameraCBuffer->Data.cameraPosition = *mViewerCamera->GetEyePt();
+	cameraCBuffer->Data.WorldViewProjection = identityMatrix * cameraCBuffer->Data.View * (*mViewerCamera->GetProjMatrix());
+
+
 
 	// update geometry (make it update its own pos/ world matrix)
 
@@ -611,9 +672,35 @@ void Scene::RenderGBuffer( ID3D11DeviceContext* d3dDeviceContext, const D3D11_VI
 	d3dDeviceContext->OMSetRenderTargets(1, &pRTV, pDSV); 
 };
 
-void Scene::SetSun( D3DXVECTOR3* Position, D3DXVECTOR3* Direction, D3DXVECTOR4* Power )
+void Scene::SetSun( D3DXVECTOR3 Position, D3DXVECTOR3 Direction, D3DXVECTOR4 Power )
 {
-	mSunPosition = Position;
-	mSunDirection = Direction;
-	mSunPower = Power;
+	mSunPosition = new D3DXVECTOR3(Position);
+	mSunDirection = new D3DXVECTOR3(Direction);
+	mSunPower = new D3DXVECTOR4(Power);
+}
+
+void Scene::ToneMapping( ID3D11DeviceContext* d3dDeviceContext, ID3D11ShaderResourceView* inputRender, ID3D11Buffer* quadVertices )
+{
+	d3dDeviceContext->IASetInputLayout(parentApp->mPositionTexCoordLayout);
+	UINT stride = sizeof(PositionTexCoordVertex);
+	UINT offset = 0;
+	d3dDeviceContext->IASetVertexBuffers(0, 1, &quadVertices, &stride, &offset);
+	d3dDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+	d3dDeviceContext->VSSetShader(toneMappingVS->GetShader(), NULL, 0);
+	d3dDeviceContext->GSSetShader(NULL, NULL, 0);
+	d3dDeviceContext->PSSetShader(toneMappingPS->GetShader(), NULL, 0);
+	d3dDeviceContext->PSSetShaderResources(0, 1, &inputRender);
+
+	ID3D11RenderTargetView* tempRTV[] = {DXUTGetD3D11RenderTargetView()};
+	d3dDeviceContext->OMSetRenderTargets(1, tempRTV, NULL);
+	d3dDeviceContext->OMSetBlendState(NULL, NULL, 0xffffffff);
+
+	d3dDeviceContext->Draw(4, 0); //quad
+
+	d3dDeviceContext->OMSetRenderTargets(0, 0, 0);
+	d3dDeviceContext->OMSetBlendState(NULL, NULL, 0xffffffff);
+
+	ID3D11ShaderResourceView* pSRV[] = {NULL};
+	d3dDeviceContext->PSSetShaderResources(0, 1, pSRV);
 }

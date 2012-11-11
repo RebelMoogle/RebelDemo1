@@ -70,9 +70,9 @@ VertexOutput CraftMyGBufferVS(VertexInput input)
 	//output.position     = mul(positionView, Projection);
 	output.position		= mul(float4(input.position, 1.0f), WorldViewProj);
 	//output.position.w	= 1.0f;
-	output.normal       = mul(float4(input.normal, 0.0f),  World); //mul(World, View)); // KEINE 1.0f  bei NORMALE
+	output.normal       = mul(float4(input.normal, 0.0f), World); //mul(World, View)); // KEINE 1.0f  bei NORMALE
 	output.texCoord     = input.texCoord;
-	output.worldPosition = mul(float4(input.position, 1.0f),World);//output.position;
+	output.worldPosition = mul(float4(input.position, 1.0f), World);//output.position;
 
 	return output;
 }

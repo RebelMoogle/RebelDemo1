@@ -8,7 +8,7 @@
 class BaseGeometry : public ID3DDeviceResource
 {
 public:
-	explicit BaseGeometry(bool isItStatic);
+	explicit BaseGeometry(bool isItStatic = true);
 	virtual ~BaseGeometry(void);
 
 	void Bind(ID3D11DeviceContext* ImmediateContext);

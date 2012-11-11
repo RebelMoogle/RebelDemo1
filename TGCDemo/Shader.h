@@ -32,6 +32,7 @@ namespace ShaderFactoryUtil
 		HRESULT hr = d3dDevice->CreateVertexShader(shaderBytecode, bytecodeLength, 0, &shader);
 		if (FAILED(hr)) {
 			DXUT_ERR_MSGBOX(L"failed to create Vertex shader", hr);
+			assert(false);
 		}
 		return shader;
 	}
@@ -44,6 +45,7 @@ namespace ShaderFactoryUtil
 		HRESULT hr = d3dDevice->CreateGeometryShader(shaderBytecode, bytecodeLength, 0, &shader);
 		if (FAILED(hr)) {
 			DXUT_ERR_MSGBOX(L"failed to create Geometry shader", hr);
+			assert(false);
 		}
 		return shader;
 	}
@@ -56,6 +58,7 @@ namespace ShaderFactoryUtil
 		HRESULT hr = d3dDevice->CreatePixelShader(shaderBytecode, bytecodeLength, 0, &shader);
 		if (FAILED(hr)) {
 			DXUT_ERR_MSGBOX(L"failed to create pixel shader", hr);
+			assert(false);
 		}
 		return shader;
 	}
@@ -68,6 +71,7 @@ namespace ShaderFactoryUtil
 		HRESULT hr = d3dDevice->CreateComputeShader(shaderBytecode, bytecodeLength, 0, &shader);
 		if (FAILED(hr)) {
 			DXUT_ERR_MSGBOX(L"failed to create compute shader", hr);
+			assert(false);
 		}
 		return shader;
 	}
@@ -100,7 +104,8 @@ public:
 
 		if (FAILED(hr)) {
 			// TODO: Define exception type and improve this error string, but the ODS will do for now
-			DXUT_ERR_MSGBOX(L"failed to create compile shader", hr);
+			DXUT_ERR_MSGBOX(L"failed to compile shader", hr);
+			assert(false);
 		}
 
 

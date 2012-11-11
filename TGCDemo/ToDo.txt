@@ -6,8 +6,8 @@
 		x- Worldgeometry -> GBuffer -> ParicleSystem -> combine Particles and GBuffer on final render
 		- combination shader
 		- Splat Particles onto final.
-	- TextureToScreen 30 min
-	 - shader
+	x- TextureToScreen 30 min
+	 x- shader
 
 ### Next: ###
 
@@ -29,6 +29,8 @@
 - change from lines into swirls (map? dynamically change according to position / points?) tue/wed
 
 - make animation/movie/automatic run. thu/fri (take saturday off!)
+
+- clean, memory leaks, etc.
 
 - Saturday final touches
 
