@@ -426,6 +426,7 @@
     <ClCompile Include="DXUT\Optional\SDKmisc.cpp" />
     <None Include="Media\noise.png" />
     <None Include="Media\Particle1.png" />
+    <None Include="Media\Particle2.png" />
     <None Include="Shaders\CraftMyGBuffer.hlsl" />
     <None Include="Shaders\DeferredShade.hlsl" />
     <None Include="Shaders\DiffuseMaterial.hlsl" />

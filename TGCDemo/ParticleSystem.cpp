@@ -84,7 +84,7 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 
 	// create particle input layout
 	{
-		ID3D10Blob *bytecode = mParticleSystemVS->GetByteCode();
+		ID3D10Blob *bytecode = mRenderParticlesVS->GetByteCode();
 
 		const D3D11_INPUT_ELEMENT_DESC layout[] =
 		{
@@ -113,7 +113,7 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 	{
 		CD3D11_RASTERIZER_DESC desc(D3D11_DEFAULT);
 		desc.CullMode = D3D11_CULL_NONE;
-		desc.DepthClipEnable = TRUE;
+		desc.DepthClipEnable = FALSE;
 		desc.FillMode = D3D11_FILL_SOLID;
 		desc.FrontCounterClockwise = FALSE;
 		HRESULT hr = Device->CreateRasterizerState(&desc, &mRasterizerState);
@@ -139,8 +139,8 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 		CD3D11_DEPTH_STENCIL_DESC desc(D3D11_DEFAULT);
 		desc.StencilEnable = false;
 		desc.DepthEnable = true;
-		desc.DepthFunc = D3D11_COMPARISON_ALWAYS;
-		desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+		desc.DepthFunc = D3D11_COMPARISON_LESS;
+		desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 		HRESULT hr = Device->CreateDepthStencilState(&desc, &mDepthState);
 
 		if (FAILED(hr)) {
@@ -194,14 +194,14 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 
 	PARTICLEDATA deadParticle;
 	ZeroMemory(&deadParticle, sizeof(PARTICLEDATA));
-	deadParticle.position = D3DXVECTOR4(0.1,0.1,0,0);
-	deadParticle.duration = 100.0f; //zero duration == dead
-	deadParticle.color = D3DXVECTOR4(1.0f, 0.1f, 0.01f, 1.0f);
+	deadParticle.position = D3DXVECTOR4(1,1,1,1);
+	deadParticle.duration = 0.0f; //zero duration == dead
+	deadParticle.color = D3DXVECTOR4(0.2f, 0.3f, 1.0f, 1.0f);
 	deadParticle.direction = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	deadParticle.speed = 0.0f;
 	deadParticle.rotation = 0.0f;
-	deadParticle.size = 50.0f;
-	deadParticle.flags = PARTICLE_ALIVE; // no flags set, all false
+	deadParticle.size = 1.0f;
+	deadParticle.flags = 0; // no flags set, all false
 	particleInitData.pSysMem = &deadParticle;
 	particleInitData.SysMemPitch = sizeof(PARTICLEDATA);
 
@@ -221,7 +221,7 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 	// create constant buffers
 
 	// load particle texture
-	hr = D3DX11CreateShaderResourceViewFromFile(Device, L"Media\\Particle1.png", NULL, NULL, &mParticleTexture, NULL);
+	hr = D3DX11CreateShaderResourceViewFromFile(Device, L"Media\\Particle2.png", NULL, NULL, &mParticleTexture, NULL);
 	if (FAILED(hr)) {
 		DXUT_ERR_MSGBOX(L"failed to create Particle Texture Resource View", hr);
 		return false;
@@ -243,20 +243,20 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 
 bool ParticleSystem::D3DCreateSwapChain( ID3D11Device* Device, IDXGISwapChain* SwapChain, const DXGI_SURFACE_DESC* BackBufferSurfaceDesc )
 {
-	mSystemCB->Data.colorStart			= D3DXVECTOR4(1,1,1,1);
+	mSystemCB->Data.colorStart			= D3DXVECTOR4(0.2f,0.3f,1,1);
 	mSystemCB->Data.colorEnd            = D3DXVECTOR4(1,1,1,1);
 	mSystemCB->Data.colorDeviation      = D3DXVECTOR4(0,0,0,0);
 	mSystemCB->Data.positionStart       = D3DXVECTOR4(0,0,0,0);
-	mSystemCB->Data.positionDeviation	= D3DXVECTOR4(0,0,0,0);
+	mSystemCB->Data.positionDeviation	= D3DXVECTOR4(10,1,1,0);
 	mSystemCB->Data.spawnTime			= 0.0f;
 	mSystemCB->Data.spawnDeviation		= 0.0f;
-	mSystemCB->Data.durationTime		= 50.0f;
-	mSystemCB->Data.durationDeviation	= 10.0f;
+	mSystemCB->Data.durationTime		= 5.0f;
+	mSystemCB->Data.durationDeviation	= 1.0f;
 	mSystemCB->Data.speed				= 0.0f;
 	mSystemCB->Data.speedDeviation		= 0.0f;
 	mSystemCB->Data.rotation			= 0.0f;
 	mSystemCB->Data.rotationDeviation	= 0.0f;
-	mSystemCB->Data.sizeStart			= 50.0f;
+	mSystemCB->Data.sizeStart			= 0.5f;
 	mSystemCB->Data.sizeDeviation		= 0.5f;
 	mSystemChange = true;
 
@@ -319,14 +319,13 @@ void ParticleSystem::Render(ID3D11DeviceContext* ImmediateContext, ID3D11RenderT
 	// first frame: we haven't streamed out yet.
 	if (mInitParticle)
 	{
-		ImmediateContext->Draw(mMaxParticleCount,0);
+		ImmediateContext->Draw(1,0);
 		mInitParticle = false;
 	}
 	else
 	{
-		ImmediateContext->Draw(mMaxParticleCount,0);
+		ImmediateContext->DrawAuto();
 	}
-		//ImmediateContext->DrawAuto();
 	
 	
 	//reset render targets and states.
@@ -354,6 +353,22 @@ void ParticleSystem::Render(ID3D11DeviceContext* ImmediateContext, ID3D11RenderT
 	ImmediateContext->GSSetShader(mRenderParticlesGS->GetShader(), NULL, 0);
 	ImmediateContext->PSSetShader(mRenderParticlesPS->GetShader(), NULL, 0);
 
+	tempBuffer = mFrameCB->GetBuffer();
+
+	ImmediateContext->VSSetConstantBuffers(2, 1, &tempBuffer);
+	ImmediateContext->GSSetConstantBuffers(2, 1, &tempBuffer);
+	ImmediateContext->PSSetConstantBuffers(2, 1, &tempBuffer);
+
+	//Set System Data Buffer
+	tempBuffer = mSystemCB->GetBuffer();
+
+	ImmediateContext->VSSetConstantBuffers(3, 1, &tempBuffer);
+	ImmediateContext->GSSetConstantBuffers(3, 1, &tempBuffer);
+	ImmediateContext->PSSetConstantBuffers(3, 1, &tempBuffer);
+
+	ImmediateContext->PSSetSamplers(0, 1, &mDiffuseSampler);
+	ImmediateContext->GSSetSamplers(0, 1, &mDiffuseSampler);
+
 	//set render target and stats.
 	float blendFactor[] = {1,1,1,1}; 
 	ImmediateContext->OMSetRenderTargets(1, &particleRTV, NULL);//DXUTGetD3D11DepthStencilView());
@@ -365,7 +380,7 @@ void ParticleSystem::Render(ID3D11DeviceContext* ImmediateContext, ID3D11RenderT
 	ImmediateContext->PSSetSamplers(0, 1, &mDiffuseSampler);
 	// render particles. (to screen)
 
-	ImmediateContext->Draw(mMaxParticleCount,0);
+	ImmediateContext->DrawAuto();
 	//ImmediateContext->DrawAuto();
 
 	// clean up
@@ -377,6 +392,22 @@ void ParticleSystem::Render(ID3D11DeviceContext* ImmediateContext, ID3D11RenderT
 
 void ParticleSystem::D3DReleaseDevice()
 {
+	mFrameCB->D3DReleaseDevice();
+	mSystemCB->D3DReleaseDevice();
+	SAFE_DELETE(mRenderParticlesVS);
+	SAFE_DELETE(mRenderParticlesGS);
+	SAFE_DELETE(mRenderParticlesPS);
+	
+	SAFE_RELEASE(mParticleBlend);
+	SAFE_RELEASE(mParticleBufferDraw);
+	SAFE_RELEASE(mParticleBufferStream);
+	SAFE_RELEASE(mParticleLayout);
+	//SAFE_DELETE(mParticleSystemVS);
+	//SAFE_DELETE(mParticleSystemGS);
+	SAFE_RELEASE(mDiffuseSampler);
+	SAFE_RELEASE(mDepthState);
+	SAFE_RELEASE(mNoiseTexture);
+	SAFE_RELEASE(mRasterizerState);
 
 }
 

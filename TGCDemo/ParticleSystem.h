@@ -98,8 +98,6 @@ private:
 	ID3D11Buffer* mParticleBufferStream;
 	ID3D11Buffer* mParticleBufferDraw;
 
-	ID3D11ShaderResourceView* particleTexture;
-
 	// shader for computing particles. output directly to buffer
 	VertexShader* mParticleSystemVS;
 	ID3D11GeometryShader* mParticleSystemGS; // no output stream shader factory yet. 

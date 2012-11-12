@@ -49,7 +49,8 @@ void ParticleSystemGS( point GS_PARTICLE input[1], inout PointStream<GS_PARTICLE
 	output.size			= input[0].size;
 	output.flags		= input[0].flags;
 
-	bool alive = ( fmod(output.flags, 2) == PARTICLEALIVE );
+	// don't have any other flags yet, so this is faster.
+	bool alive = ( output.flags > 0 ); //fmod(input[0].flags, 2) == PARTICLEALIVE) 
 
 	// if particle empty (duration <= 0 ) check if new ones need to be created (spawn rate), 
 	//											else: skip
@@ -66,7 +67,7 @@ void ParticleSystemGS( point GS_PARTICLE input[1], inout PointStream<GS_PARTICLE
 			output.duration = spawnTime + (randomVal - 0.5) * spawnDeviation; // input random spawn wait with deviation.
 			
 			//put a new random val in there
-			randomVal = rand(float2(randomVal, tempVal));	
+			//randomVal = rand(float2(randomVal, tempVal));	
 		} 
 		else
 		{
@@ -78,15 +79,20 @@ void ParticleSystemGS( point GS_PARTICLE input[1], inout PointStream<GS_PARTICLE
 	}
 	else if(output.duration <= 0 ) // dead and spawn wait over.
 	{
+		// SPAWN NEW PARTICLE!
 		output.flags = PARTICLEALIVE; //TODO: append any other flags
 
 		output.duration = durationTime + (randomVal - 0.5) * durationDeviation;
 		//put a new random val in there
-		randomVal = rand(float2(randomVal, tempVal));
+		//randomVal = rand(float2(randomVal, tempVal));
 
 		output.position = positionStart + (randomVal - 0.5) * positionDeviation;
 		//put a new random val in there
-		randomVal = rand(float2(randomVal, tempVal));
+		//randomVal = rand(float2(randomVal, tempVal));
+
+		output.color = colorStart + (randomVal - 0.5) * colorDeviation;
+		//put a new random val in there
+		//randomVal = rand(float2(randomVal, tempVal));
 
 		output.speed = speed + (randomVal - 0.5) * speedDeviation;
 

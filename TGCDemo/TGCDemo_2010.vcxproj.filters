@@ -94,6 +94,7 @@
     <None Include="Shaders\OmniMaterial.hlsl" />
     <None Include="Shaders\ToneMapping.hlsl" />
     <None Include="Media\noise.png" />
+    <None Include="Media\Particle2.png" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TGCDemo.cpp" />

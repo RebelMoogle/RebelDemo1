@@ -512,7 +512,7 @@ void Scene::Render(ID3D11DeviceContext* ImmediateContext, const D3D11_VIEWPORT* 
 		lightConstData.lightPositionAngle = D3DXVECTOR4(*mSunPosition, 0.0f);
 		lightConstData.lightPower = *mSunPower;
 		lightConstData.lightDirectionDistance = D3DXVECTOR4(*mSunDirection, 1.0f);
-		//RenderForward(ImmediateContext, mainViewPort, &lightConstData);
+		RenderForward(ImmediateContext, mainViewPort, &lightConstData);
 
 	}
 
