@@ -14,6 +14,10 @@
 
 #define SPECULAR_EXP 1.0f
 
+// PARTICLE FLAGS
+#define PARTICLE_ALIVE 1
+
+
 struct PositionTexCoordVertex
 {
 	D3DXVECTOR3 position;

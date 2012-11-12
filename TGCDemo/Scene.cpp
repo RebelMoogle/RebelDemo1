@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "BaseGeometry.h"
 #include "BaseMaterial.h"
+#include "ParticleSystem.h"
 
 
 Scene::Scene(MainApp* givenApp) :
@@ -12,6 +13,7 @@ parentApp(givenApp)
 		mGeometryInstances.clear();
 		mViewerCamera = new CFirstPersonCamera();
 		cameraCBuffer = new ConstantBuffer<CameraConstants>();
+		mLineParticles = new ParticleSystem();
 }
 
 
@@ -22,6 +24,7 @@ Scene::~Scene(void)
 	mMaterials.clear();
 	mGeometryInstances.clear();
 	SAFE_DELETE(mViewerCamera);
+	SAFE_DELETE(mLineParticles);
 
 }
 
@@ -212,6 +215,9 @@ bool Scene::D3DCreateDevice(ID3D11Device* Device, const DXGI_SURFACE_DESC* BackB
 	toneMappingVS = new VertexShader(Device, L"Shaders\\ToneMapping.hlsl", "ToneMappingVS");
 	toneMappingPS = new PixelShader(Device, L"Shaders\\ToneMapping.hlsl", "ToneMappingPS");
 
+	// Particle System
+	mLineParticles->D3DCreateDevice(Device,BackBufferSurfaceDesc);
+
 	return true;
 }
 
@@ -233,6 +239,8 @@ void Scene::D3DReleaseDevice()
 	{
 		SAFE_RELEASE((*it));
 	}
+
+	mLineParticles->D3DReleaseDevice();
 
 	cameraCBuffer->D3DReleaseDevice();
 	SAFE_DELETE(cameraCBuffer);
@@ -421,6 +429,8 @@ bool Scene::D3DCreateSwapChain(ID3D11Device* d3dDevice, IDXGISwapChain* SwapChai
 		d3dDevice->CreateShaderResourceView(splattingTexture, srViewDesc, &splattingSRV);
 	}
 
+	mLineParticles->D3DCreateSwapChain(d3dDevice, SwapChain, BackBufferSurfaceDesc);
+
 	return true;
 }
 
@@ -435,6 +445,8 @@ void Scene::D3DReleaseSwapChain()
 	mGBuffer.clear();
 	mGBufferRTV.clear();
 	mGBufferSRV.clear();
+
+	mLineParticles->D3DReleaseSwapChain();
 
 	//for (std::size_t i = 0; i < mLightGBuffer.size(); ++i) {
 	//	SAFE_RELEASE(mLightGBuffer[i]);
@@ -500,13 +512,15 @@ void Scene::Render(ID3D11DeviceContext* ImmediateContext, const D3D11_VIEWPORT* 
 		lightConstData.lightPositionAngle = D3DXVECTOR4(*mSunPosition, 0.0f);
 		lightConstData.lightPower = *mSunPower;
 		lightConstData.lightDirectionDistance = D3DXVECTOR4(*mSunDirection, 1.0f);
-		RenderForward(ImmediateContext, mainViewPort, &lightConstData);
+		//RenderForward(ImmediateContext, mainViewPort, &lightConstData);
 
 	}
 
 	ImmediateContext->ClearDepthStencilView(pDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	// put together particle system and gbuffer stuff //get data from splattingRTV or Gbuffer RTVs, bind as SRVs.
+	mLineParticles->Render(ImmediateContext, splattingRTV, tempCameraCBuffer);
+
 
 	// call tonemapping
 	ImmediateContext->ClearDepthStencilView(pDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
@@ -541,7 +555,8 @@ void Scene::Move( float elapsedTime )
 	cameraCBuffer->Data.cameraPosition = *mViewerCamera->GetEyePt();
 	cameraCBuffer->Data.WorldViewProjection = identityMatrix * cameraCBuffer->Data.View * (*mViewerCamera->GetProjMatrix());
 
-
+	//update particle system
+	mLineParticles->Update(elapsedTime);
 
 	// update geometry (make it update its own pos/ world matrix)
 

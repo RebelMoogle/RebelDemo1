@@ -26,6 +26,7 @@ class MainApp;
 class BaseGeometry;
 class BaseMaterial;
 class BaseGeometryInstance;
+class ParticleSystem;
 
 class Scene
 {
@@ -120,5 +121,8 @@ private:
 	D3DXVECTOR3* mSunPosition;
 	D3DXVECTOR3* mSunDirection;
 	D3DXVECTOR4* mSunPower;
+
+	//Particle System
+	ParticleSystem* mLineParticles;
 };
 

@@ -424,6 +424,7 @@
     <ClCompile Include="DXUT\Optional\DXUTsettingsdlg.cpp" />
     <ClCompile Include="DXUT\Optional\SDKmesh.cpp" />
     <ClCompile Include="DXUT\Optional\SDKmisc.cpp" />
+    <None Include="Media\noise.png" />
     <None Include="Media\Particle1.png" />
     <None Include="Shaders\CraftMyGBuffer.hlsl" />
     <None Include="Shaders\DeferredShade.hlsl" />

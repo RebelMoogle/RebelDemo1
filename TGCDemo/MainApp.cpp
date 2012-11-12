@@ -22,12 +22,12 @@ MainApp::~MainApp(void)
 	SAFE_RELEASE(mPositionTexCoordLayout);	
 }
 
-bool MainApp::D3DCreateDevice( ID3D11Device* d3dDevice, const DXGI_SURFACE_DESC* BackBufferSurfaceDesc )
+bool MainApp::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_DESC* BackBufferSurfaceDesc )
 {
 	//render Texture To Screen
-	mTextureToScreenVS = new VertexShader(d3dDevice, L"Shaders\\TextureToScreen.hlsl", "TextureToScreenVS");
-	mTextureToScreenGS = new GeometryShader(d3dDevice, L"Shaders\\TextureToScreen.hlsl", "TextureToScreenGS");
-	mTextureToScreenPS = new PixelShader(d3dDevice, L"Shaders\\TextureToScreen.hlsl", "TextureToScreenPS");
+	mTextureToScreenVS = new VertexShader(Device, L"Shaders\\TextureToScreen.hlsl", "TextureToScreenVS");
+	mTextureToScreenGS = new GeometryShader(Device, L"Shaders\\TextureToScreen.hlsl", "TextureToScreenGS");
+	mTextureToScreenPS = new PixelShader(Device, L"Shaders\\TextureToScreen.hlsl", "TextureToScreenPS");
 
 	// Create  texture to screen input layout
 	{
@@ -40,7 +40,7 @@ bool MainApp::D3DCreateDevice( ID3D11Device* d3dDevice, const DXGI_SURFACE_DESC*
 			{"TEXCOORD",  0, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		};
 
-		d3dDevice->CreateInputLayout( 
+		Device->CreateInputLayout( 
 			layout, ARRAYSIZE(layout), 
 			bytecode->GetBufferPointer(),
 			bytecode->GetBufferSize(), 
@@ -54,11 +54,11 @@ bool MainApp::D3DCreateDevice( ID3D11Device* d3dDevice, const DXGI_SURFACE_DESC*
 
 		desc.CullMode = D3D11_CULL_NONE;
 		desc.DepthClipEnable = FALSE;
-		d3dDevice->CreateRasterizerState(&desc, &mNoDepthRasterizerState);
+		Device->CreateRasterizerState(&desc, &mNoDepthRasterizerState);
 
 		desc.CullMode = D3D11_CULL_NONE;
 		desc.FillMode = D3D11_FILL_WIREFRAME;
-		d3dDevice->CreateRasterizerState(&desc, &mWireRasterizerState);
+		Device->CreateRasterizerState(&desc, &mWireRasterizerState);
 
 
 	}
@@ -70,12 +70,12 @@ bool MainApp::D3DCreateDevice( ID3D11Device* d3dDevice, const DXGI_SURFACE_DESC*
 		desc.StencilEnable = false;
 		desc.DepthFunc = D3D11_COMPARISON_LESS;
 		desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-		d3dDevice->CreateDepthStencilState(&desc, &mDefaultDepthState);
+		Device->CreateDepthStencilState(&desc, &mDefaultDepthState);
 	}
 
 	// ### Render Texture To Screen Buffer and Vertex Buffer
 	{
-		mTextureToScreenCBuffer->D3DCreateDevice(d3dDevice, BackBufferSurfaceDesc);
+		mTextureToScreenCBuffer->D3DCreateDevice(Device, BackBufferSurfaceDesc);
 		mTextureToScreenCBuffer->Data.mDestRect = D3DXVECTOR4(0, 0, 1, 1);
 
 		// create vertices
@@ -98,10 +98,10 @@ bool MainApp::D3DCreateDevice( ID3D11Device* d3dDevice, const DXGI_SURFACE_DESC*
 		InitData.pSysMem = vertices;
 		InitData.SysMemPitch = 0;
 		InitData.SysMemSlicePitch = 0;
-		d3dDevice->CreateBuffer( &bd, &InitData, &mTextureToScreenVertexBuffer );
+		Device->CreateBuffer( &bd, &InitData, &mTextureToScreenVertexBuffer );
 	}
 
-	if(!sceneBuilder->GetScene()->D3DCreateDevice(d3dDevice, BackBufferSurfaceDesc))
+	if(!sceneBuilder->GetScene()->D3DCreateDevice(Device, BackBufferSurfaceDesc))
 		DXUT_ERR_MSGBOX(L"Scene D3D device not created", S_FALSE);
 
 	return true;

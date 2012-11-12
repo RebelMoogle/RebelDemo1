@@ -18,33 +18,76 @@
 
 // #### Particles #####
 
-// particle constants
-cbuffer cbConstant : register(b1)
+#define PARTICLEALIVE 1
+
+// Data that changes each frame for the particles
+cbuffer PARTICLEFRAMEDATA: register(b2) // is b3 and b2, cause b0 and b1 are camera constant buffers.
 {
 	float delta;
-	float maxDuration;
-	// more later
-};
+}
+
+
+// PARTICLE System constant Data
+cbuffer PARTICLESYSTEMDATA: register(b3) // is b3 and b2, cause b0 and b1 are camera constant buffers.
+{
+	float4 colorStart;
+	float4 colorEnd;
+	float4 colorDeviation;
+	float4 positionStart;
+	float4 positionDeviation;
+	float spawnTime;
+	float spawnDeviation;
+	float durationTime;
+	float durationDeviation;
+	float speed;
+	float speedDeviation;
+	float rotation;
+	float rotationDeviation;
+	float sizeStart;
+	float sizeDeviation;
+}
+
 
 struct VS_PARTICLE
 {
-	float3 position          : POSITION;
-	float duration			 : DURATION;   
+	float4 position     : POSITION;
+	float4 color		: COLOR;
+	float3 direction	: DIRECTION;
+	float duration		: DURATION;
+	float speed			: SPEED;
+	float rotation		: ROTATION;
+	float size			: SIZE;
+	uint flags			: FLAGS;
+	  
 };
 
 struct GS_PARTICLE
 {
-	float4 position	: SV_POSITION;
-	float  duration	: DURATION;
-	// SIZE (maybe as float2 later)
+	float4 position		: SV_POSITION;
+	float4 color		: COLOR;
+	float3 direction	: DIRECTION;
+	float duration		: DURATION;
+	float speed			: SPEED;
+	float rotation		: ROTATION;
+	float size			: SIZE;
+	uint flags			: FLAGS;
+	  
 };
 
 struct PS_PARTICLE
 {
-	float4 position	: SV_POSITION;
-	float2 Tex		: TEXCOORD0;
-	float  duration	: DURATION;
+	float4 position		: SV_POSITION;
+	float2 Tex			: TEXCOORD0;
+	float4 color		: COLOR;
+	float3 direction	: DIRECTION;
+	float duration		: DURATION;
+	float speed			: SPEED;
+	float rotation		: ROTATION;
+	float size			: SIZE;
+	uint flags			: FLAGS;
+	  
 };
+
 
 // ##### General ####
 
@@ -85,8 +128,6 @@ SamplerState defaultSampler : register(s0)
 	AddressV = Wrap;
 	AddressW = Wrap;
 };
-
-Texture2D randomMap : register(t9);
 
 /** Fresnel reflection coefficient by Schlick's approximation.*/
 float3 ComputeFresnel(in float3 F0, in float cos_i) {

@@ -1,10 +1,14 @@
 #include "DXUT.h"
 #include "ParticleSystem.h"
+#include "constants.h"
 
 
 ParticleSystem::ParticleSystem(void)
 {
 	mMaxParticleCount = 100;
+	mSystemChange = false;
+	mSystemCB = new ConstantBuffer<PARTICLESYSTEMDATA>();
+	mFrameCB = new ConstantBuffer<PARTICLEFRAMEDATA>();
 	mInitParticle = true;
 }
 
@@ -35,25 +39,30 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 		HRESULT hr = D3DX11CompileFromFile( L"Shaders\\GPUParticles.hlsl", NULL, 0, "ParticleSystemGS", "gs_5_0", shaderFlags, 0, 0, &bytecode, &errors, 0);
 		if (errors) {
 			OutputDebugStringA(static_cast<const char *>(errors->GetBufferPointer()));
-			return false;
+			//return false;
 		}
 
 		if (FAILED(hr)) {
 			DXUT_ERR_MSGBOX(L"failed to compile Particle System Geometry Shader", hr);
 			return false;
 		}
-		D3D11_SO_DECLARATION_ENTRY BounceBufferOutputDecl[] =
+		D3D11_SO_DECLARATION_ENTRY ParticleBufferOutputDecl[] =
 		{
-			// stream, sem name, sem index, start component, component count, output slot
-			{ 0, "SV_POSITION", 0, 0, 3, 0},
+			{ 0, "SV_POSITION", 0, 0, 4, 0},
+			{ 0, "COLOR", 0, 0, 4, 0},
+			{ 0, "DIRECTION", 0, 0, 3, 0},
 			{ 0, "DURATION", 0, 0, 1, 0},
+			{ 0, "SPEED", 0, 0, 1, 0},
+			{ 0, "ROTATION", 0, 0, 1, 0},
+			{ 0, "SIZE", 0, 0, 1, 0},
+			{ 0, "FLAGS", 0, 0, 1, 0}
 		};
-		UINT strides[] = { (4 + 1)  * sizeof(float) };
+		UINT strides[] = { sizeof(PARTICLEDATA) };
 
 		hr = Device->CreateGeometryShaderWithStreamOutput(	bytecode->GetBufferPointer(), 
 			bytecode->GetBufferSize(), 
-			BounceBufferOutputDecl, 
-			ARRAYSIZE(BounceBufferOutputDecl), 
+			ParticleBufferOutputDecl, 
+			ARRAYSIZE(ParticleBufferOutputDecl), 
 			strides, 
 			1, 
 			D3D11_SO_NO_RASTERIZED_STREAM, 
@@ -73,15 +82,21 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 	mRenderParticlesGS = new GeometryShader(Device, L"Shaders\\RenderParticles.hlsl", "RenderParticlesGS");
 	mRenderParticlesPS = new PixelShader(Device, L"Shaders\\RenderParticles.hlsl", "RenderParticlesPS");
 
-	// create mesh input layout
+	// create particle input layout
 	{
 		ID3D10Blob *bytecode = mParticleSystemVS->GetByteCode();
 
 		const D3D11_INPUT_ELEMENT_DESC layout[] =
 		{
-			{"position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-			{"duration", 0, DXGI_FORMAT_R32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		};
+			{"POSITION",		0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,	0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"COLOR",			0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"DIRECTION",		0, DXGI_FORMAT_R32G32B32_FLOAT, 0,	32, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"DURATION",		0, DXGI_FORMAT_R32_FLOAT,		0, 44, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"SPEED",			0, DXGI_FORMAT_R32_FLOAT,		0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"ROTATION",		0, DXGI_FORMAT_R32_FLOAT,		0, 52, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"SIZE",			0, DXGI_FORMAT_R32_FLOAT,		0, 56, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"FLAGS",			0, DXGI_FORMAT_R32_UINT,		0, 60, D3D11_INPUT_PER_VERTEX_DATA, 0}
+		}; //total size is 64
 
 		HRESULT hr = Device->CreateInputLayout(
 								layout, ARRAYSIZE(layout),
@@ -124,7 +139,7 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 		CD3D11_DEPTH_STENCIL_DESC desc(D3D11_DEFAULT);
 		desc.StencilEnable = false;
 		desc.DepthEnable = true;
-		desc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+		desc.DepthFunc = D3D11_COMPARISON_ALWAYS;
 		desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 		HRESULT hr = Device->CreateDepthStencilState(&desc, &mDepthState);
 
@@ -159,6 +174,7 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 			DXUT_ERR_MSGBOX(L"failed to create particle blend state", hr);
 			return false;
 		}
+
 	}
 
 	// create vertex, index and constant Buffers
@@ -178,9 +194,14 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 
 	PARTICLEDATA deadParticle;
 	ZeroMemory(&deadParticle, sizeof(PARTICLEDATA));
-	deadParticle.position = D3DXVECTOR3(10,10,0);
-	deadParticle.duration = 0.0f; //zero duration == dead
-
+	deadParticle.position = D3DXVECTOR4(0.1,0.1,0,0);
+	deadParticle.duration = 100.0f; //zero duration == dead
+	deadParticle.color = D3DXVECTOR4(1.0f, 0.1f, 0.01f, 1.0f);
+	deadParticle.direction = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	deadParticle.speed = 0.0f;
+	deadParticle.rotation = 0.0f;
+	deadParticle.size = 50.0f;
+	deadParticle.flags = PARTICLE_ALIVE; // no flags set, all false
 	particleInitData.pSysMem = &deadParticle;
 	particleInitData.SysMemPitch = sizeof(PARTICLEDATA);
 
@@ -191,7 +212,7 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 		return false;
 	}
 
-	hr = Device->CreateBuffer(&bd, NULL, &mParticleBufferStream);
+	hr = Device->CreateBuffer(&bd, &particleInitData, &mParticleBufferStream);
 	if (FAILED(hr)) {
 		DXUT_ERR_MSGBOX(L"failed to create second Particle swap Buffer", hr);
 		return false;
@@ -206,56 +227,111 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 		return false;
 	}
 
+	// load particle texture
+	hr = D3DX11CreateShaderResourceViewFromFile(Device, L"Media\\noise.png", NULL, NULL, &mNoiseTexture, NULL);
+	if (FAILED(hr)) {
+		DXUT_ERR_MSGBOX(L"failed to create Noise Texture Resource View", hr);
+		return false;
+	}
+
+	// Constant Buffers
+	mSystemCB->D3DCreateDevice(Device,BackBufferSurfaceDesc);
+	mFrameCB->D3DCreateDevice(Device,BackBufferSurfaceDesc);
+
 	return true;
 }
 
 bool ParticleSystem::D3DCreateSwapChain( ID3D11Device* Device, IDXGISwapChain* SwapChain, const DXGI_SURFACE_DESC* BackBufferSurfaceDesc )
 {
+	mSystemCB->Data.colorStart			= D3DXVECTOR4(1,1,1,1);
+	mSystemCB->Data.colorEnd            = D3DXVECTOR4(1,1,1,1);
+	mSystemCB->Data.colorDeviation      = D3DXVECTOR4(0,0,0,0);
+	mSystemCB->Data.positionStart       = D3DXVECTOR4(0,0,0,0);
+	mSystemCB->Data.positionDeviation	= D3DXVECTOR4(0,0,0,0);
+	mSystemCB->Data.spawnTime			= 0.0f;
+	mSystemCB->Data.spawnDeviation		= 0.0f;
+	mSystemCB->Data.durationTime		= 50.0f;
+	mSystemCB->Data.durationDeviation	= 10.0f;
+	mSystemCB->Data.speed				= 0.0f;
+	mSystemCB->Data.speedDeviation		= 0.0f;
+	mSystemCB->Data.rotation			= 0.0f;
+	mSystemCB->Data.rotationDeviation	= 0.0f;
+	mSystemCB->Data.sizeStart			= 50.0f;
+	mSystemCB->Data.sizeDeviation		= 0.5f;
+	mSystemChange = true;
 
-
+	//immCon->Release();
 	return true;
 }
 
-void ParticleSystem::Update()
+void ParticleSystem::Update(float elapsedTime)
 {
 	// update shaders/particle system with new time and changed values.
-	// access constant buffer
-
+	// access constant buffer for: delta and other things that change every frame
+	mFrameCB->Data.delta = elapsedTime;
 
 }
 
-void ParticleSystem::Render(ID3D11DeviceContext* d3dDeviceContext)
+void ParticleSystem::Render(ID3D11DeviceContext* ImmediateContext, ID3D11RenderTargetView* particleRTV, ID3D11Buffer* cameraBuffer)
 {
+	//keep frame constant buffer up to date
+	mFrameCB->UpdateBuffer(ImmediateContext);
+
+	if (mSystemChange) // only update when changed, to save bandwidth, should only be updated once per sys.
+	{
+		mSystemCB->UpdateBuffer(ImmediateContext);
+		mSystemChange = false;
+	}
+
 	// simulate particles
-	d3dDeviceContext->IASetInputLayout(mParticleLayout);
-	UINT stride = sizeof(PARTICLEDATA); // create struct for size or something (equal to layout)
+	ImmediateContext->IASetInputLayout(mParticleLayout);
+	UINT stride = sizeof(PARTICLEDATA);
 	UINT offset = 0;
-	d3dDeviceContext->IASetVertexBuffers(0, 1, &mParticleBufferDraw, &stride, &offset );
-	d3dDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+	ImmediateContext->IASetVertexBuffers(0, 1, &mParticleBufferDraw, &stride, &offset );
+	ImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 
-	d3dDeviceContext->VSSetShader(mParticleSystemVS->GetShader(), NULL, 0);
-	d3dDeviceContext->GSSetShader(mParticleSystemGS, NULL, 0);
+	ImmediateContext->VSSetShader(mParticleSystemVS->GetShader(), NULL, 0);
+	ImmediateContext->GSSetShader(mParticleSystemGS, NULL, 0);
 
-	//set shader resource (textures, etc)
-	d3dDeviceContext->GSSetShaderResources(1, 1, &mParticleTexture);
+	//ImmediateContext->PSSetShaderResources(9, 1, &mNoiseTexture);
+
+	// set Frame Buffer
+	ID3D11Buffer* tempBuffer = mFrameCB->GetBuffer();
+
+	ImmediateContext->VSSetConstantBuffers(2, 1, &tempBuffer);
+	ImmediateContext->GSSetConstantBuffers(2, 1, &tempBuffer);
+	ImmediateContext->PSSetConstantBuffers(2, 1, &tempBuffer);
+
+	//Set System Data Buffer
+	tempBuffer = mSystemCB->GetBuffer();
+
+	ImmediateContext->VSSetConstantBuffers(3, 1, &tempBuffer);
+	ImmediateContext->GSSetConstantBuffers(3, 1, &tempBuffer);
+	ImmediateContext->PSSetConstantBuffers(3, 1, &tempBuffer);
+	
+	ImmediateContext->PSSetSamplers(0, 1, &mDiffuseSampler);
+	ImmediateContext->GSSetSamplers(0, 1, &mDiffuseSampler);
 
 	// SET stream output targets
-	d3dDeviceContext->SOSetTargets(1, &mParticleBufferStream, &offset);
+	ImmediateContext->SOSetTargets(1, &mParticleBufferStream, &offset);
 
 	// render
 	// first frame: we haven't streamed out yet.
 	if (mInitParticle)
 	{
-		d3dDeviceContext->Draw(1,0);
+		ImmediateContext->Draw(mMaxParticleCount,0);
 		mInitParticle = false;
 	}
 	else
-		d3dDeviceContext->DrawAuto();
+	{
+		ImmediateContext->Draw(mMaxParticleCount,0);
+	}
+		//ImmediateContext->DrawAuto();
 	
 	
 	//reset render targets and states.
 	ID3D11Buffer* swapTemp = NULL;
-	d3dDeviceContext->SOSetTargets(1, &swapTemp, 0);
+	ImmediateContext->SOSetTargets(1, &swapTemp, 0);
 
 
 	// Swap particle buffers
@@ -263,36 +339,40 @@ void ParticleSystem::Render(ID3D11DeviceContext* d3dDeviceContext)
 	mParticleBufferDraw = mParticleBufferStream;
 	mParticleBufferStream = swapTemp;
 
-	SAFE_RELEASE(swapTemp);
+	//SAFE_RELEASE(swapTemp);
 
 	// sync constant buffer
+	ImmediateContext->VSSetConstantBuffers(0, 1, &cameraBuffer);
+	ImmediateContext->GSSetConstantBuffers(0, 1, &cameraBuffer);
+	ImmediateContext->PSSetConstantBuffers(0, 1, &cameraBuffer);
 
 	// set buffers and shaders for rendering
-	d3dDeviceContext->IASetVertexBuffers(0, 1, &mParticleBufferDraw, &stride, &offset);
-	d3dDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+	ImmediateContext->IASetVertexBuffers(0, 1, &mParticleBufferDraw, &stride, &offset);
+	ImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 
-	d3dDeviceContext->VSSetShader(mRenderParticlesVS->GetShader(), NULL, 0);
-	d3dDeviceContext->GSSetShader(mRenderParticlesGS->GetShader(), NULL, 0);
-	d3dDeviceContext->PSSetShader(mRenderParticlesPS->GetShader(), NULL, 0);
+	ImmediateContext->VSSetShader(mRenderParticlesVS->GetShader(), NULL, 0);
+	ImmediateContext->GSSetShader(mRenderParticlesGS->GetShader(), NULL, 0);
+	ImmediateContext->PSSetShader(mRenderParticlesPS->GetShader(), NULL, 0);
 
 	//set render target and stats.
 	float blendFactor[] = {1,1,1,1}; 
-	ID3D11RenderTargetView* tempRTV[] = {DXUTGetD3D11RenderTargetView()};
-	d3dDeviceContext->OMSetRenderTargets(1, tempRTV, NULL);
-	d3dDeviceContext->OMSetBlendState(mParticleBlend, blendFactor, 0xffffffff );
-	d3dDeviceContext->OMSetDepthStencilState(mDepthState, 0);
-	d3dDeviceContext->RSSetState(mRasterizerState);
+	ImmediateContext->OMSetRenderTargets(1, &particleRTV, NULL);//DXUTGetD3D11DepthStencilView());
+	ImmediateContext->OMSetBlendState(mParticleBlend, blendFactor, 0xffffffff );
+	ImmediateContext->OMSetDepthStencilState(mDepthState, 0);
+	//ImmediateContext->RSSetState(mRasterizerState);
 
-	d3dDeviceContext->PSSetShaderResources(1, 1, &mParticleTexture);
+	ImmediateContext->PSSetShaderResources(1, 1, &mParticleTexture);
+	ImmediateContext->PSSetSamplers(0, 1, &mDiffuseSampler);
 	// render particles. (to screen)
 
-	d3dDeviceContext->DrawAuto();
+	ImmediateContext->Draw(mMaxParticleCount,0);
+	//ImmediateContext->DrawAuto();
 
 	// clean up
-	d3dDeviceContext->OMSetRenderTargets(0, 0, 0);
-	d3dDeviceContext->OMSetBlendState(NULL, NULL, 0xffffffff);
-	d3dDeviceContext->OMSetDepthStencilState(NULL, 0);
-	d3dDeviceContext->RSSetState(NULL);
+	ImmediateContext->OMSetRenderTargets(0, 0, 0);
+	ImmediateContext->OMSetBlendState(NULL, NULL, 0xffffffff);
+	ImmediateContext->OMSetDepthStencilState(NULL, 0);
+	ImmediateContext->RSSetState(NULL);
 }
 
 void ParticleSystem::D3DReleaseDevice()
@@ -303,5 +383,11 @@ void ParticleSystem::D3DReleaseDevice()
 void ParticleSystem::D3DReleaseSwapChain()
 {
 
+}
+
+void ParticleSystem::SetSystemData( PARTICLESYSTEMDATA* newSysData )
+{
+	mSystemCB->Data = *newSysData;
+	mSystemChange = true;
 }
 
