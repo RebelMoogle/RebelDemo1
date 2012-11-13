@@ -102,6 +102,16 @@ bool Scene::D3DCreateDevice(ID3D11Device* Device, const DXGI_SURFACE_DESC* BackB
 		Device->CreateSamplerState(&desc, &mDiffuseSampler);
 	}
 
+	// Create sampler state
+	{
+		CD3D11_SAMPLER_DESC desc(D3D11_DEFAULT);
+		desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		desc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;
+		desc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;
+		desc.AddressW = D3D11_TEXTURE_ADDRESS_MIRROR;
+		Device->CreateSamplerState(&desc, &mMirrorSampler);
+	}
+
 	{
 		CD3D11_DEPTH_STENCIL_DESC desc(D3D11_DEFAULT);
 		desc.StencilEnable = false;
@@ -252,6 +262,7 @@ void Scene::D3DReleaseDevice()
 
 	SAFE_RELEASE(mRasterizerState);
 	SAFE_RELEASE(mDiffuseSampler);
+	SAFE_RELEASE(mMirrorSampler);
 	SAFE_RELEASE(mDepthState);
 	SAFE_RELEASE(mGeometryBlendState);
 	SAFE_RELEASE(mDeferredShadeBlend);
@@ -264,6 +275,7 @@ void Scene::D3DReleaseDevice()
 
 	
 	SAFE_RELEASE(splattingTexture);
+	SAFE_RELEASE(linesTexture);
 	SAFE_RELEASE(splattingRTV);
 	SAFE_RELEASE(splattingSRV);
 	SAFE_DELETE(toneMappingPS);
@@ -274,7 +286,7 @@ void Scene::D3DReleaseDevice()
 }
 
 // ================================================================================
-bool Scene::D3DCreateSwapChain(ID3D11Device* d3dDevice, IDXGISwapChain* SwapChain, const DXGI_SURFACE_DESC* BackBufferSurfaceDesc)
+bool Scene::D3DCreateSwapChain(ID3D11Device* Device, IDXGISwapChain* SwapChain, const DXGI_SURFACE_DESC* BackBufferSurfaceDesc)
 {
 	if (mViewerCamera)
 	{
@@ -310,25 +322,25 @@ bool Scene::D3DCreateSwapChain(ID3D11Device* d3dDevice, IDXGISwapChain* SwapChai
 	{
 		ID3D11Texture2D *tempTexture;
 		CD3D11_TEXTURE2D_DESC texDesc = CD3D11_TEXTURE2D_DESC(DXGI_FORMAT_R16G16B16A16_FLOAT, mGBufferWidth, mGBufferHeight, 1, 1, D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE, D3D11_USAGE_DEFAULT);
-		d3dDevice->CreateTexture2D(&texDesc, 0, &tempTexture);
+		Device->CreateTexture2D(&texDesc, 0, &tempTexture);
 
 		//diffuse
 		mGBuffer.push_back(tempTexture);
 
-		d3dDevice->CreateTexture2D(&texDesc, 0, &tempTexture);
+		Device->CreateTexture2D(&texDesc, 0, &tempTexture);
 		//specular
 		mGBuffer.push_back(tempTexture);
 
-		d3dDevice->CreateTexture2D(&texDesc, 0, &tempTexture);
+		Device->CreateTexture2D(&texDesc, 0, &tempTexture);
 		//transmittance
 		mGBuffer.push_back(tempTexture);
 
-		d3dDevice->CreateTexture2D(&texDesc, 0, &tempTexture);
+		Device->CreateTexture2D(&texDesc, 0, &tempTexture);
 		//normal
 		mGBuffer.push_back(tempTexture);
 
 		texDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		d3dDevice->CreateTexture2D(&texDesc, 0, &tempTexture);
+		Device->CreateTexture2D(&texDesc, 0, &tempTexture);
 		//normal
 		mGBuffer.push_back(tempTexture);
 	};
@@ -351,8 +363,8 @@ bool Scene::D3DCreateSwapChain(ID3D11Device* d3dDevice, IDXGISwapChain* SwapChai
 
 		rtViewDesc->Format = tempTexDesc->Format;
 		srViewDesc->Format = tempTexDesc->Format;
-		d3dDevice->CreateRenderTargetView(mGBuffer[i], rtViewDesc, &mGBufferRTV[i]);
-		d3dDevice->CreateShaderResourceView(mGBuffer[i], srViewDesc,&mGBufferSRV[i] );
+		Device->CreateRenderTargetView(mGBuffer[i], rtViewDesc, &mGBufferRTV[i]);
+		Device->CreateShaderResourceView(mGBuffer[i], srViewDesc,&mGBufferSRV[i] );
 	}
 
 	////GBuffer light
@@ -418,18 +430,25 @@ bool Scene::D3DCreateSwapChain(ID3D11Device* d3dDevice, IDXGISwapChain* SwapChai
 	//	SAFE_RELEASE(tempTexture);
 	//}
 
+	// load lines texture
+	HRESULT hr = D3DX11CreateShaderResourceViewFromFile(Device, L"Media\\lines.png", NULL, NULL, &linesTexture, NULL);
+	if (FAILED(hr)) {
+		DXUT_ERR_MSGBOX(L"failed to create Particle Texture Resource View", hr);
+		return false;
+	}
+
 	// splatting Render Target
 	{
 		CD3D11_TEXTURE2D_DESC texDesc = CD3D11_TEXTURE2D_DESC(DXGI_FORMAT_R32G32B32A32_FLOAT, BackBufferSurfaceDesc->Width, BackBufferSurfaceDesc->Height, 1, 1, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE, D3D11_USAGE_DEFAULT);
-		d3dDevice->CreateTexture2D(&texDesc, 0, &splattingTexture);
+		Device->CreateTexture2D(&texDesc, 0, &splattingTexture);
 
 		rtViewDesc->Format = texDesc.Format;
 		srViewDesc->Format = texDesc.Format;
-		d3dDevice->CreateRenderTargetView(splattingTexture, rtViewDesc, &splattingRTV);
-		d3dDevice->CreateShaderResourceView(splattingTexture, srViewDesc, &splattingSRV);
+		Device->CreateRenderTargetView(splattingTexture, rtViewDesc, &splattingRTV);
+		Device->CreateShaderResourceView(splattingTexture, srViewDesc, &splattingSRV);
 	}
 
-	mLineParticles->D3DCreateSwapChain(d3dDevice, SwapChain, BackBufferSurfaceDesc);
+	mLineParticles->D3DCreateSwapChain(Device, SwapChain, BackBufferSurfaceDesc);
 
 	return true;
 }
@@ -481,8 +500,8 @@ void Scene::Render(ID3D11DeviceContext* ImmediateContext, const D3D11_VIEWPORT* 
 	ImmediateContext->VSSetConstantBuffers(0, 1, &tempCameraCBuffer);
 	ImmediateContext->GSSetConstantBuffers(0, 1, &tempCameraCBuffer);
 	ImmediateContext->PSSetConstantBuffers(0, 1, &tempCameraCBuffer);
-	ImmediateContext->PSSetSamplers(0, 1, &mDiffuseSampler);
-	ImmediateContext->GSSetSamplers(0, 1, &mDiffuseSampler);
+	ImmediateContext->PSSetSamplers(1, 1, &mMirrorSampler);
+	ImmediateContext->GSSetSamplers(1, 1, &mMirrorSampler);
 
 	RenderGBuffer(ImmediateContext, mainViewPort);
 
@@ -644,6 +663,7 @@ void Scene::RenderGBuffer( ID3D11DeviceContext* d3dDeviceContext, const D3D11_VI
 
 	ID3D11ShaderResourceView *const pSRV[4] = {NULL, NULL, NULL, NULL};
 	d3dDeviceContext->PSSetShaderResources(0, 4, pSRV);
+	d3dDeviceContext->PSSetShaderResources(4, 1, &linesTexture);
 	//d3dDeviceContext->PSSetSamplers(0, 1, &mDiffuseSampler);
 
 	d3dDeviceContext->OMSetDepthStencilState(mDepthState, 0);
@@ -718,4 +738,9 @@ void Scene::ToneMapping( ID3D11DeviceContext* d3dDeviceContext, ID3D11ShaderReso
 
 	ID3D11ShaderResourceView* pSRV[] = {NULL};
 	d3dDeviceContext->PSSetShaderResources(0, 1, pSRV);
+}
+
+void Scene::ChangeVale( int change )
+{
+	mLineParticles->ChangeGravity(change);
 }

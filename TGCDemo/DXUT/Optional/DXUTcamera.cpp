@@ -659,10 +659,10 @@ D3DUtil_CameraKeys CBaseCamera::MapKey( UINT nKey )
             return CAM_MOVE_FORWARD;
         case VK_DOWN:
             return CAM_MOVE_BACKWARD;
-        case VK_PRIOR:
-            return CAM_MOVE_UP;        // pgup
-        case VK_NEXT:
-            return CAM_MOVE_DOWN;      // pgdn
+        //case VK_PRIOR:
+        //    return CAM_MOVE_UP;        // pgup
+        //case VK_NEXT:
+        //    return CAM_MOVE_DOWN;      // pgdn
 
         case 'A':
             return CAM_STRAFE_LEFT;
@@ -672,23 +672,23 @@ D3DUtil_CameraKeys CBaseCamera::MapKey( UINT nKey )
             return CAM_MOVE_FORWARD;
         case 'S':
             return CAM_MOVE_BACKWARD;
-        case 'Q':
+       /* case 'Q':
             return CAM_MOVE_DOWN;
         case 'E':
-            return CAM_MOVE_UP;
+            return CAM_MOVE_UP;*/
 
-        case VK_NUMPAD4:
-            return CAM_STRAFE_LEFT;
-        case VK_NUMPAD6:
-            return CAM_STRAFE_RIGHT;
-        case VK_NUMPAD8:
-            return CAM_MOVE_FORWARD;
-        case VK_NUMPAD2:
-            return CAM_MOVE_BACKWARD;
-        case VK_NUMPAD9:
-            return CAM_MOVE_UP;
-        case VK_NUMPAD3:
-            return CAM_MOVE_DOWN;
+        //case VK_NUMPAD4:
+        //    return CAM_STRAFE_LEFT;
+        //case VK_NUMPAD6:
+        //    return CAM_STRAFE_RIGHT;
+        //case VK_NUMPAD8:
+        //    return CAM_MOVE_FORWARD;
+        //case VK_NUMPAD2:
+        //    return CAM_MOVE_BACKWARD;
+        //case VK_NUMPAD9:
+        //    return CAM_MOVE_UP;
+        //case VK_NUMPAD3:
+        //    return CAM_MOVE_DOWN;
 
         case VK_HOME:
             return CAM_RESET;

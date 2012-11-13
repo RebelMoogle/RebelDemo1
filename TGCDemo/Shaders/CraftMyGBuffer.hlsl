@@ -44,6 +44,8 @@ struct GBuffer
 	//float depth : SV_Target4;
 };
 
+Texture2D linesTexture : register(t4);
+
 //### shader output/input structs
 
 struct VertexInput
@@ -83,7 +85,7 @@ void CraftMyGBufferPS(VertexOutput input, out GBuffer craftedGBuffer)
 	//craftedGBuffer.specular = specularMap.Sample(defaultSampler, input.texCoord, int2(0,0));// * specularConstant;
 	//craftedGBuffer.diffuse = diffuseMap.Sample(defaultSampler, input.texCoord);// * diffuseConstant;
 	craftedGBuffer.specular = specularColor;
-	craftedGBuffer.diffuse = diffuseColor;
+	craftedGBuffer.diffuse = diffuseColor * linesTexture.Sample(mirrorSampler, input.texCoord);
 	craftedGBuffer.transmittance = transmissive;//float3(1,1,1); //transmissiveConstant;//transmissiveMap.sample(defaultSampler, input.texCoord).rgb * transmissiveConstant;b
 	//craftedGBuffer.transmittance.a = refractiveIndexETA;
 	craftedGBuffer.normal = normalize(input.normal); // or normalMap? combine with normalMap?

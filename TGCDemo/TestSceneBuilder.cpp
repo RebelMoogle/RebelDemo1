@@ -4,6 +4,7 @@
 #include "Scene.h"
 #include "BoxGeometry.h"
 #include "DefaultMaterial.h"
+#include <random>
 
 
 TestSceneBuilder::TestSceneBuilder(MainApp* givenApp):
@@ -34,7 +35,7 @@ bool TestSceneBuilder::Init()
 	const D3DXVECTOR4 black = D3DXVECTOR4(0.001f, 0.001f, 0.001f, 25.0f);
 	const D3DXVECTOR4 zeroes = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f);
 
-	DefaultMaterial* matBlue = new DefaultMaterial(blue, blue);
+	DefaultMaterial* matBlue = new DefaultMaterial(black, zeroes);
 	DefaultMaterial* matBlack = new DefaultMaterial(black, black);
 	sceneToBuild->AddMaterial(matBlue);
 	sceneToBuild->AddMaterial(matBlack);
@@ -51,7 +52,7 @@ bool TestSceneBuilder::Init()
 	sceneCamera->SetEnablePositionMovement(true);
 	sceneCamera->SetScalers(0.01f, 10.0f);
 
-	sceneCamera->SetViewParams(&D3DXVECTOR3(-2.0f, 3.0f, -2.0f), &D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+	sceneCamera->SetViewParams(&D3DXVECTOR3(-10.0f, 2.0f, -10.0f), &D3DXVECTOR3(0.0f, 4.0f, 0.0f));
 
 	sceneToBuild->SetCamera(sceneCamera);
 

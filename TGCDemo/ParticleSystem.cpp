@@ -6,7 +6,7 @@
 
 ParticleSystem::ParticleSystem(void)
 {
-	mMaxParticleCount = 1000;
+	mMaxParticleCount = 50000;
 	mSystemChange = false;
 	mSystemCB = new ConstantBuffer<PARTICLESYSTEMDATA>();
 	mFrameCB = new ConstantBuffer<PARTICLEFRAMEDATA>();
@@ -222,7 +222,7 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 		return false;
 	}
 
-	// load particle texture
+	// load noise texture
 	hr = D3DX11CreateShaderResourceViewFromFile(Device, L"Media\\noise.png", NULL, NULL, &mNoiseTexture, NULL);
 	if (FAILED(hr)) {
 		DXUT_ERR_MSGBOX(L"failed to create Noise Texture Resource View", hr);
@@ -238,23 +238,27 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 
 bool ParticleSystem::D3DCreateSwapChain( ID3D11Device* Device, IDXGISwapChain* SwapChain, const DXGI_SURFACE_DESC* BackBufferSurfaceDesc )
 {
-	mSystemCB->Data.colorStart			= D3DXVECTOR4(0.6f,0.6f,1.0f,1);
-	mSystemCB->Data.colorEnd            = D3DXVECTOR4(1,1,1,1);
-	mSystemCB->Data.colorDeviation      = D3DXVECTOR4(0,0,0,1);
-	mSystemCB->Data.positionStart       = D3DXVECTOR4(0,0,0,0);
-	mSystemCB->Data.positionDeviation	= D3DXVECTOR4(1,0,100,0);
-	mSystemCB->Data.directionStart		= D3DXVECTOR4(1, 0, 0,1);
-	mSystemCB->Data.directionDeviation	= D3DXVECTOR4(0, 0, 0,1);
-	mSystemCB->Data.spawnTime			= 5.0f;
-	mSystemCB->Data.spawnDeviation		= 1.5f;
-	mSystemCB->Data.durationTime		= 1.0f;
-	mSystemCB->Data.durationDeviation	= 10.0f;
-	mSystemCB->Data.speedStart			= 100.0f;
+
+	mFrameCB->Data.delta = 0;
+	mFrameCB->Data.CenterGravity = 0;
+
+	mSystemCB->Data.colorStart			= D3DXVECTOR4(0.3f,0.6f,0.8f,1);
+	mSystemCB->Data.colorEnd            = D3DXVECTOR4(0,0,0,1);
+	mSystemCB->Data.colorDeviation      = D3DXVECTOR4(0.1,0.1,0.2,1);
+	mSystemCB->Data.positionStart       = D3DXVECTOR4(0,-1,0,0);
+	mSystemCB->Data.positionDeviation	= D3DXVECTOR4(100,0,100,0);
+	mSystemCB->Data.directionStart		= D3DXVECTOR4(1, 0, 0, 1);
+	mSystemCB->Data.directionDeviation	= D3DXVECTOR4(0, 10, 0, 1);
+	mSystemCB->Data.spawnTime			= 2.0f;
+	mSystemCB->Data.spawnDeviation		= 1.0f;
+	mSystemCB->Data.durationTime		= 30.0f;
+	mSystemCB->Data.durationDeviation	= 5.0f;
+	mSystemCB->Data.speedStart			= 5.0f;
 	mSystemCB->Data.speedDeviation		= 10.0f;
 	mSystemCB->Data.rotationStart		= 0.0f;
 	mSystemCB->Data.rotationDeviation	= 0.0f;
-	mSystemCB->Data.sizeStart			= 1.0f;
-	mSystemCB->Data.sizeDeviation		= 1.0f;
+	mSystemCB->Data.sizeStart			= 0.2f;
+	mSystemCB->Data.sizeDeviation		= 0.1f;
 	mSystemChange = true;
 
 	//immCon->Release();
@@ -375,7 +379,7 @@ void ParticleSystem::Render(ID3D11DeviceContext* ImmediateContext, ID3D11RenderT
 	ImmediateContext->OMSetDepthStencilState(mDepthState, 0);
 	//ImmediateContext->RSSetState(mRasterizerState);
 
-	ImmediateContext->PSSetShaderResources(1, 1, &mParticleTexture);
+	ImmediateContext->PSSetShaderResources(4, 1, &mParticleTexture);
 	ImmediateContext->PSSetSamplers(0, 1, &mDiffuseSampler);
 	// render particles. (to screen)
 
@@ -432,17 +436,27 @@ void ParticleSystem::GimmeParticles(PARTICLEDATA* fillerUp)
 	ZeroMemory(fillerUp, sizeof(PARTICLEDATA) * mMaxParticleCount);
 	for (UINT i = 0; i < mMaxParticleCount; i++)
 	{
-		fillerUp[i].position = D3DXVECTOR4(	1.0f * mRandomDist(mRandomEngine),
-											1.0f * mRandomDist(mRandomEngine),
-											1.0f * mRandomDist(mRandomEngine),1) ;
+		fillerUp[i].position = D3DXVECTOR4(	0,0,0,1) ;
 		fillerUp[i].initRandom = D3DXVECTOR4(mRandomDist(mRandomEngine), mRandomDist(mRandomEngine), mRandomDist(mRandomEngine), mRandomDist(mRandomEngine));
 		fillerUp[i].duration = 0.0f; //zero duration == dead
-		fillerUp[i].color = D3DXVECTOR4(0.2f, 0.3f, 1.0f, 1.0f);
+		fillerUp[i].color = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f);
 		fillerUp[i].direction = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		fillerUp[i].speed = 0.0f;
 		fillerUp[i].rotation = 0.0f;
 		fillerUp[i].size = 1.0f;
 		fillerUp[i].flags = 0; // no flags set, all false
 	}
+}
+
+void ParticleSystem::ChangeGravity( int gravity )
+{
+	if(gravity == 0)
+	{
+		mFrameCB->Data.CenterGravity = 0.0f;
+		return;
+	}
+
+	mFrameCB->Data.CenterGravity = min(max(mFrameCB->Data.CenterGravity + float(gravity)/10.0, -2.0), 2.0);
+	//mFrameCB->Data.CenterGravity += gravity;
 }
 

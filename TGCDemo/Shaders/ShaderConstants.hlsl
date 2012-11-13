@@ -23,6 +23,7 @@
 // Data that changes each frame for the particles
 cbuffer ParticleFrameData : register(b3) // is b3 and b2, cause b0 and b1 are camera constant buffers.
 {
+	float CenterGravity;
 	float Delta;
 }
 
@@ -139,6 +140,15 @@ SamplerState defaultSampler : register(s0)
 	AddressU = Wrap;
 	AddressV = Wrap;
 	AddressW = Wrap;
+};
+
+// sampler
+SamplerState mirrorSampler : register(s1)
+{
+	Filter = MIN_MAG_MIP_LINEAR;
+	AddressU = Mirror;
+	AddressV = Mirror;
+	AddressW = Mirror;
 };
 
 /** Fresnel reflection coefficient by Schlick's approximation.*/

@@ -73,6 +73,7 @@ struct PARTICLESYSTEMDATA
 // Data that changes each frame for the particles
 struct PARTICLEFRAMEDATA
 {
+	float CenterGravity;
 	float delta;
 };
 
@@ -95,6 +96,8 @@ public:
 	void Render(ID3D11DeviceContext* d3dDeviceContext, ID3D11RenderTargetView* particleRTV, ID3D11Buffer* cameraBuffer);
 
 	void SetSystemData(PARTICLESYSTEMDATA* newSysData);
+
+	void ChangeGravity(int gravity);
 
 private:
 

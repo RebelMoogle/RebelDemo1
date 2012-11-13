@@ -194,4 +194,9 @@ void MainApp::RenderTextureToScreen( ID3D11DeviceContext* d3dDeviceContext, ID3D
 
 }
 
+void MainApp::ChangeValue( int change)
+{
+	sceneBuilder->GetScene()->ChangeVale(change);
+}
+
 

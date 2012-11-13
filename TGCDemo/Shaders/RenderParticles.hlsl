@@ -13,7 +13,7 @@
 //--------------------------------------------------------------------------------------
 // Constant Buffer Variables
 //--------------------------------------------------------------------------------------
-Texture2D<float4> particleTex : register(t1);
+Texture2D<float4> particleTex : register(t4);
 
 
 // Need Depth and Blend States?
@@ -96,7 +96,7 @@ float4 RenderParticlesPS( PS_PARTICLE input) : SV_Target
 	//TODO distribute values equally (histogram)
 	float4 color = particleTex.Sample(defaultSampler, input.Tex) * input.color;
 
-	return color; //input.color.a);
+	return color * 10; //input.color.a);
 }
 
 #endif // RENDERPARTICLES_HLSL

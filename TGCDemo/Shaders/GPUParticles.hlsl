@@ -72,12 +72,34 @@ void ParticleSystemGS( point GS_PARTICLE input[1], inout PointStream<GS_PARTICLE
 			//put a new random val in there
 			randomVal = rand(float2(randomVal,  output.initialRandom.x));	
 		} 
+
+		float lifeLeft = output.duration/DurationTime;
+
+		// use smoothstep if not smooth enough.
+
+		if(lifeLeft > 0.5)
+			output.color = lifeLeft * float4(0.001,0.001,0.001,0.001) + (1.0 - lifeLeft) * ColorStart;
+		else
+			output.color = lifeLeft * ColorStart + (1.0 - lifeLeft) * ColorEnd;
 		
 		// move particle
 		// change position / color / alpha according to formula / change method.
-		//output.color.rgb = output.color.rgb + delta * output.initialRandom.yzw;
+		//output.color.rgb = ;
 		// either type or different geometry shaders.
-		output.position.xyz = output.position.xyz + output.direction * (output.speed * Delta);
+		
+		// if completed about 1 square, turn
+		 
+		float3 towardsCenter = (DirectionDeviation.xyz - output.position.xyz);
+		output.position.xyz = output.position.xyz + output.direction.xyz * (lifeLeft * output.speed * Delta) * max((1.0 - CenterGravity), 0);
+		output.position.xyz = output.position.xyz + towardsCenter * (output.speed * Delta) * CenterGravity;
+
+		if(CenterGravity > 0)
+		{
+			output.direction += (1.0 - lifeLeft) * cross(towardsCenter, float3(0,1,0) * Delta);
+			//output.position.xyz += (1.0 - lifeLeft) * float3(0, towardsCenter.y, 0) * Delta;
+			//output.color = lifeLeft * ColorStart + (1.0 - lifeLeft) * float4(0.8, 0, 0.3, 1.0);
+		}	
+		//output.position.xyz = output.position.xyz + lifeLeft * float3(-towardsCenter.x, 0, -towardsCenter.z) * (output.speed * Delta) * CenterGravity;
 
 	}
 	else if(output.duration <= 0 ) // dead and spawn wait over.
@@ -89,7 +111,7 @@ void ParticleSystemGS( point GS_PARTICLE input[1], inout PointStream<GS_PARTICLE
 		//put a new random val in there
 		randomVal = rand(float2(randomVal, output.initialRandom.y));
 
-		output.color = ColorStart + (randomVal - 0.5) * ColorDeviation;
+		output.color = float4(0.001,0.001,0.001,1);
 		//put a new random val in there
 		randomVal = rand(float2(randomVal, Delta));
 
@@ -97,25 +119,27 @@ void ParticleSystemGS( point GS_PARTICLE input[1], inout PointStream<GS_PARTICLE
 		output.speed = SpeedStart + (randomVal - 0.5) * SpeedDeviation;
 
 		//position
-		output.position.x = PositionStart.x + (randomVal - 0.5) * PositionDeviation.x;
+		output.position.x = PositionStart.x + floor((randomVal - 0.5) * PositionDeviation.x) + 0.5;
 		//put a new random val in there
 		randomVal = rand(float2(randomVal, Delta));
 
-		output.position.y = PositionStart.y + (randomVal - 0.5) * PositionDeviation.y;
+		output.position.y = PositionStart.y + floor((randomVal - 0.5) * PositionDeviation.y) + 0.5;
 		//put a new random val in there
 		randomVal = rand(float2(randomVal, Delta));
 
-		output.position.z = PositionStart.z + (randomVal - 0.5) * PositionDeviation.z;
+		output.position.z = PositionStart.z + floor((randomVal - 0.5) * PositionDeviation.z) + 0.5;
 		//put a new random val in there
 		randomVal = rand(float2(randomVal, tempVal));
 
 		//direction
-		output.direction.x = DirectionStart.x + (randomVal -0.5) * DirectionDeviation.x;
-		randomVal = rand(float2(randomVal, Delta));
-		//output.direction.y = directionStart.y + (randomVal -0.5) * directionDeviation.y;
+		output.direction = DirectionStart;
+		//randomVal = rand(float2(randomVal, Delta));
+		output.direction.y = 0; //directionStart.y + (randomVal -0.5) * directionDeviation.y;
 		//randomVal = rand(float2(randomVal, delta));
-		//output.direction.z = directionStart.z + (randomVal -0.5) * directionDeviation.z;
+		output.direction.z = 0; //directionStart.z + (randomVal -0.5) * directionDeviation.z;
 		//randomVal = rand(float2(randomVal, delta));
+
+		output.size = SizeStart + (randomVal -0.5) * SizeDeviation;
 
 	}
 		

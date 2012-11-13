@@ -153,6 +153,23 @@ LRESULT CALLBACK MsgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam,
 //--------------------------------------------------------------------------------------
 void CALLBACK OnKeyboard( UINT nChar, bool bKeyDown, bool bAltDown, void* pUserContext )
 {
+	if( bKeyDown )
+	{
+		switch( nChar )
+		{
+		case 'Q':
+		case VK_PRIOR:  // Page Up
+			gMainApp->ChangeValue(1);
+			break;
+		case 'E':
+		case VK_NEXT: // Page Down
+			gMainApp->ChangeValue(-1);
+		break;
+		case 'R':
+			gMainApp->ChangeValue(0);
+			break;
+		}
+	}
 }
 
 

@@ -27,39 +27,39 @@ bool BoxGeometry::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_DESC
 	{
 		//FRONT
 		{ mPosition + D3DXVECTOR3( 0.0f, 0.0f, 0.0f),			D3DXVECTOR3( 0.0f, 0.0f, -1.0f), D3DXVECTOR2(0.0f, 0.0f) }, // Bottom Left,	0
-		{ mPosition + D3DXVECTOR3( 0.0f, mScale.y, 0.0f),		D3DXVECTOR3( 0.0f, 0.0f, -1.0f), D3DXVECTOR2(1.0f, 0.0f) }, // Top Left,	1 
-		{ mPosition + D3DXVECTOR3( mScale.x, 0.0f, 0.0f),		D3DXVECTOR3( 0.0f, 0.0f, -1.0f), D3DXVECTOR2(0.0f, 1.0f) }, // Bottom Right,2
-		{ mPosition + D3DXVECTOR3( mScale.x, mScale.y, 0.0f),	D3DXVECTOR3( 0.0f, 0.0f, -1.0f), D3DXVECTOR2(1.0f, 1.0f) }, // Top Right,	3
+		{ mPosition + D3DXVECTOR3( 0.0f, mScale.y, 0.0f),		D3DXVECTOR3( 0.0f, 0.0f, -1.0f), D3DXVECTOR2(mScale.x, 0.0f) }, // Top Left,	1 
+		{ mPosition + D3DXVECTOR3( mScale.x, 0.0f, 0.0f),		D3DXVECTOR3( 0.0f, 0.0f, -1.0f), D3DXVECTOR2(0.0f, mScale.z) }, // Bottom Right,2
+		{ mPosition + D3DXVECTOR3( mScale.x, mScale.y, 0.0f),	D3DXVECTOR3( 0.0f, 0.0f, -1.0f), D3DXVECTOR2(mScale.x, mScale.z) }, // Top Right,	3
 
 		//RIGHT
 		{ mPosition + D3DXVECTOR3( mScale.x, 0.0f, 0.0f),		D3DXVECTOR3( 1.0f, 0.0f, 0.0f),	D3DXVECTOR2(0.0f, 0.0f) }, // Bottom Left,	4
-		{ mPosition + D3DXVECTOR3( mScale.x, mScale.y, 0.0f),	D3DXVECTOR3( 1.0f, 0.0f, 0.0f),	D3DXVECTOR2(1.0f, 0.0f) }, // Top Left,		5 
-		{ mPosition + D3DXVECTOR3( mScale.x, 0.0f, mScale.z),	D3DXVECTOR3( 1.0f, 0.0f, 0.0f),	D3DXVECTOR2(0.0f, 1.0f) }, // Bottom Right,	6
-		{ mPosition + D3DXVECTOR3( mScale.x, mScale.y, mScale.z), D3DXVECTOR3( 1.0f, 0.0f, 0.0f),	D3DXVECTOR2(1.0f, 1.0f) }, // Top Right,	7
+		{ mPosition + D3DXVECTOR3( mScale.x, mScale.y, 0.0f),	D3DXVECTOR3( 1.0f, 0.0f, 0.0f),	D3DXVECTOR2(mScale.x, 0.0f) }, // Top Left,		5 
+		{ mPosition + D3DXVECTOR3( mScale.x, 0.0f, mScale.z),	D3DXVECTOR3( 1.0f, 0.0f, 0.0f),	D3DXVECTOR2(0.0f, mScale.z) }, // Bottom Right,	6
+		{ mPosition + D3DXVECTOR3( mScale.x, mScale.y, mScale.z), D3DXVECTOR3( 1.0f, 0.0f, 0.0f),	D3DXVECTOR2(mScale.x, mScale.z) }, // Top Right,	7
 
 		//LEFT
 		{ mPosition + D3DXVECTOR3( 0.0f, 0.0f, mScale.z),		D3DXVECTOR3( -1.0f, 0.0f, 0.0f), D3DXVECTOR2(0.0f, 0.0f) }, // Bottom Left,	8
-		{ mPosition + D3DXVECTOR3( 0.0f, mScale.y, mScale.z),	D3DXVECTOR3( -1.0f, 0.0f, 0.0f), D3DXVECTOR2(1.0f, 0.0f) }, // Top Left,	9 
-		{ mPosition + D3DXVECTOR3( 0.0f, 0.0f, 0.0f),			D3DXVECTOR3( -1.0f, 0.0f, 0.0f), D3DXVECTOR2(0.0f, 1.0f) }, // Bottom Right,10
-		{ mPosition + D3DXVECTOR3( 0.0f, mScale.y, 0.0f),		D3DXVECTOR3( -1.0f, 0.0f, 0.0f), D3DXVECTOR2(1.0f, 1.0f) }, // Top Right,	11
+		{ mPosition + D3DXVECTOR3( 0.0f, mScale.y, mScale.z),	D3DXVECTOR3( -1.0f, 0.0f, 0.0f), D3DXVECTOR2(mScale.x, 0.0f) }, // Top Left,	9 
+		{ mPosition + D3DXVECTOR3( 0.0f, 0.0f, 0.0f),			D3DXVECTOR3( -1.0f, 0.0f, 0.0f), D3DXVECTOR2(0.0f, mScale.z) }, // Bottom Right,10
+		{ mPosition + D3DXVECTOR3( 0.0f, mScale.y, 0.0f),		D3DXVECTOR3( -1.0f, 0.0f, 0.0f), D3DXVECTOR2(mScale.x, mScale.z) }, // Top Right,	11
 
 		//TOP
 		{ mPosition + D3DXVECTOR3( 0.0f, mScale.y, 0.0f),		D3DXVECTOR3( 0.0f, 1.0f, 0.0f),	D3DXVECTOR2(0.0f, 0.0f) }, // Bottom Left,	12
-		{ mPosition + D3DXVECTOR3( 0.0f, mScale.y, mScale.z),	D3DXVECTOR3( 0.0f, 1.0f, 0.0f),	D3DXVECTOR2(1.0f, 0.0f) }, // Top Left,		13 
-		{ mPosition + D3DXVECTOR3( mScale.x, mScale.y, 0.0f),	D3DXVECTOR3( 0.0f, 1.0f, 0.0f),	D3DXVECTOR2(0.0f, 1.0f) }, // Bottom Right,	14
-		{ mPosition + D3DXVECTOR3( mScale.x, mScale.y, mScale.z), D3DXVECTOR3( 0.0f, 1.0f, 0.0f),	D3DXVECTOR2(1.0f, 1.0f) }, // Top Right,	15
+		{ mPosition + D3DXVECTOR3( 0.0f, mScale.y, mScale.z),	D3DXVECTOR3( 0.0f, 1.0f, 0.0f),	D3DXVECTOR2(mScale.x, 0.0f) }, // Top Left,		13 
+		{ mPosition + D3DXVECTOR3( mScale.x, mScale.y, 0.0f),	D3DXVECTOR3( 0.0f, 1.0f, 0.0f),	D3DXVECTOR2(0.0f, mScale.z) }, // Bottom Right,	14
+		{ mPosition + D3DXVECTOR3( mScale.x, mScale.y, mScale.z), D3DXVECTOR3( 0.0f, 1.0f, 0.0f),	D3DXVECTOR2(mScale.x, mScale.z) }, // Top Right,	15
 
 		//BACK
 		{ mPosition + D3DXVECTOR3(mScale.x, 0.0f, mScale.z),	D3DXVECTOR3( 0.0f, 0.0f, 1.0f),	D3DXVECTOR2(0.0f, 0.0f) }, // Bottom Left,	16
-		{ mPosition + D3DXVECTOR3(mScale.x, mScale.y, mScale.z),D3DXVECTOR3( 0.0f, 0.0f, 1.0f),	D3DXVECTOR2(1.0f, 0.0f) }, // Top Left,		17
-		{ mPosition + D3DXVECTOR3( 0.0f, 0.0f, mScale.z),		D3DXVECTOR3( 0.0f, 0.0f, 1.0f),	D3DXVECTOR2(0.0f, 1.0f) }, // Bottom Right,	18
-		{ mPosition + D3DXVECTOR3( 0.0f, mScale.y, mScale.z),	D3DXVECTOR3( 0.0f, 0.0f, 1.0f),	D3DXVECTOR2(1.0f, 1.0f) }, // Top Right,	19
+		{ mPosition + D3DXVECTOR3(mScale.x, mScale.y, mScale.z),D3DXVECTOR3( 0.0f, 0.0f, 1.0f),	D3DXVECTOR2(mScale.x, 0.0f) }, // Top Left,		17
+		{ mPosition + D3DXVECTOR3( 0.0f, 0.0f, mScale.z),		D3DXVECTOR3( 0.0f, 0.0f, 1.0f),	D3DXVECTOR2(0.0f, mScale.z) }, // Bottom Right,	18
+		{ mPosition + D3DXVECTOR3( 0.0f, mScale.y, mScale.z),	D3DXVECTOR3( 0.0f, 0.0f, 1.0f),	D3DXVECTOR2(mScale.x, mScale.z) }, // Top Right,	19
 
 		//GROUND / BOTTOM
-		{ mPosition + D3DXVECTOR3( 0.0f, 0.0f, 0.0f),			D3DXVECTOR3( 0.0f, -1.0f, 0.0f), D3DXVECTOR2(1.0f, 0.0f) },	// Top Left,	20
-		{ mPosition + D3DXVECTOR3( mScale.x, 0.0f, 0.0f),		D3DXVECTOR3( 0.0f, -1.0f, 0.0f), D3DXVECTOR2(1.0f, 1.0f) }, // Top Right,	21
+		{ mPosition + D3DXVECTOR3( 0.0f, 0.0f, 0.0f),			D3DXVECTOR3( 0.0f, -1.0f, 0.0f), D3DXVECTOR2(mScale.x, 0.0f) },	// Top Left,	20
+		{ mPosition + D3DXVECTOR3( mScale.x, 0.0f, 0.0f),		D3DXVECTOR3( 0.0f, -1.0f, 0.0f), D3DXVECTOR2(mScale.x, mScale.z) }, // Top Right,	21
 		{ mPosition + D3DXVECTOR3( 0.0f, 0.0f, mScale.z),		D3DXVECTOR3( 0.0f, -1.0f, 0.0f), D3DXVECTOR2(0.0f, 0.0f) }, // Bottom Left,	22
-		{ mPosition + D3DXVECTOR3( mScale.x, 0.0f, mScale.z),	D3DXVECTOR3( 0.0f, -1.0f, 0.0f), D3DXVECTOR2(0.0f, 1.0f) } // Bottom Right,	23
+		{ mPosition + D3DXVECTOR3( mScale.x, 0.0f, mScale.z),	D3DXVECTOR3( 0.0f, -1.0f, 0.0f), D3DXVECTOR2(0.0f, mScale.z) } // Bottom Right,	23
 	};
 
 

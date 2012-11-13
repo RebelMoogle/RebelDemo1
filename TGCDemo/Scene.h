@@ -58,6 +58,8 @@ public:
 
 	void SetSun(D3DXVECTOR3 Position, D3DXVECTOR3 Direction, D3DXVECTOR4 Power);
 
+	void ChangeVale(int change);
+
 private:
 
 	void RenderForward(ID3D11DeviceContext*, const D3D11_VIEWPORT*, LightConstants* lightConstData);
@@ -94,16 +96,18 @@ private:
 
 	// final Splatting render target
 	ID3D11Texture2D* splattingTexture;
+	ID3D11ShaderResourceView* linesTexture;
 	ID3D11RenderTargetView* splattingRTV;
 	ID3D11ShaderResourceView* splattingSRV;
 
 	ID3D11RasterizerState* mRasterizerState;
 	ID3D11SamplerState* mDiffuseSampler;
+	ID3D11SamplerState* mMirrorSampler;
 	ID3D11DepthStencilState* mDepthState;
 	ID3D11BlendState* mGeometryBlendState;
 	ID3D11BlendState* mDeferredShadeBlend;
 
-
+	//CaMERA
 	CFirstPersonCamera* mViewerCamera;
 	ConstantBuffer<CameraConstants>* cameraCBuffer;
 

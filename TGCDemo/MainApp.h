@@ -48,6 +48,8 @@ public:
 	
 	ID3D11InputLayout* mPositionTexCoordLayout;
 
+	void ChangeValue(int);
+
 private:
 
 	void InitScene();
