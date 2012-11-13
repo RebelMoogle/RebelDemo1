@@ -33,6 +33,7 @@ bool alive			: ALIVE;
 struct PARTICLEDATA
 {
 	D3DXVECTOR4 position;
+	D3DXVECTOR4 initRandom;
 	D3DXVECTOR4 color;
 	D3DXVECTOR3 direction;
 	float duration;
@@ -47,15 +48,23 @@ struct PARTICLESYSTEMDATA
 	D3DXVECTOR4 colorStart;
 	D3DXVECTOR4 colorEnd;
 	D3DXVECTOR4 colorDeviation;
+
 	D3DXVECTOR4 positionStart;
 	D3DXVECTOR4 positionDeviation;
+
+	D3DXVECTOR4 directionStart;
+	D3DXVECTOR4 directionDeviation;
+
 	float spawnTime;
 	float spawnDeviation;
+
 	float durationTime;
 	float durationDeviation;
-	float speed;
+
+	float speedStart;
 	float speedDeviation;
-	float rotation;
+	
+	float rotationStart;
 	float rotationDeviation;
 	float sizeStart;
 	float sizeDeviation;
@@ -88,6 +97,8 @@ public:
 	void SetSystemData(PARTICLESYSTEMDATA* newSysData);
 
 private:
+
+	void GimmeParticles(PARTICLEDATA* fillerUp);
 
 	// PARTICLE SYSTEM SETTINGS
 	UINT mMaxParticleCount;

@@ -21,36 +21,46 @@
 #define PARTICLEALIVE 1
 
 // Data that changes each frame for the particles
-cbuffer PARTICLEFRAMEDATA: register(b2) // is b3 and b2, cause b0 and b1 are camera constant buffers.
+cbuffer ParticleFrameData : register(b3) // is b3 and b2, cause b0 and b1 are camera constant buffers.
 {
-	float delta;
+	float Delta;
 }
 
 
 // PARTICLE System constant Data
-cbuffer PARTICLESYSTEMDATA: register(b3) // is b3 and b2, cause b0 and b1 are camera constant buffers.
+cbuffer ParticleSystemData : register(b2) // is b3 and b2, cause b0 and b1 are camera constant buffers.
 {
-	float4 colorStart;
-	float4 colorEnd;
-	float4 colorDeviation;
-	float4 positionStart;
-	float4 positionDeviation;
-	float spawnTime;
-	float spawnDeviation;
-	float durationTime;
-	float durationDeviation;
-	float speed;
-	float speedDeviation;
-	float rotation;
-	float rotationDeviation;
-	float sizeStart;
-	float sizeDeviation;
+	float4 ColorStart;
+	float4 ColorEnd;
+	float4 ColorDeviation;
+
+	float4 PositionStart;
+	float4 PositionDeviation;
+	
+	float4 DirectionStart;
+	float4 DirectionDeviation;
+
+	float SpawnTime;
+	float SpawnDeviation;
+
+	float DurationTime;
+	float DurationDeviation;
+
+	float SpeedStart;
+	float SpeedDeviation;
+
+	float RotationStart;
+	float RotationDeviation;
+
+	float SizeStart;
+	float SizeDeviation;
 }
 
 
 struct VS_PARTICLE
 {
 	float4 position     : POSITION;
+	float4 initialRandom	: INITIALRANDOM;
 	float4 color		: COLOR;
 	float3 direction	: DIRECTION;
 	float duration		: DURATION;
@@ -64,6 +74,7 @@ struct VS_PARTICLE
 struct GS_PARTICLE
 {
 	float4 position		: SV_POSITION;
+	float4 initialRandom	: INITIALRANDOM;
 	float4 color		: COLOR;
 	float3 direction	: DIRECTION;
 	float duration		: DURATION;
@@ -78,6 +89,7 @@ struct PS_PARTICLE
 {
 	float4 position		: SV_POSITION;
 	float2 Tex			: TEXCOORD0;
+	float4 initialRandom	: INITIALRANDOM;
 	float4 color		: COLOR;
 	float3 direction	: DIRECTION;
 	float duration		: DURATION;
@@ -94,7 +106,7 @@ struct PS_PARTICLE
 // Constants for use in all shaders
 // camera, and other general stuff
 
-cbuffer changesCamera: register(b0)
+cbuffer changesCamera : register(b0)
 {
 	float4x4 World;
 	float4x4 View; 
@@ -103,7 +115,7 @@ cbuffer changesCamera: register(b0)
 	float refractiveIndexETA;
 }
 
-cbuffer changesLightCamera: register(b1)
+cbuffer changesLightCamera : register(b1)
 {
 	float4x4 lightWorld;
 	float4x4 lightView; 

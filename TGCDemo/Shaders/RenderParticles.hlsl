@@ -30,6 +30,7 @@ GS_PARTICLE RenderParticlesVS( VS_PARTICLE input )
 	
 	//output.position -= float4(size/2.0, size/2.0, 0, 0); // move vertex to upper left of quad.
 	
+	output.initialRandom = input.initialRandom;
 	output.color		= input.color;
 	output.direction	= input.direction;
 	output.duration		= input.duration;
@@ -54,6 +55,8 @@ void RenderParticlesGS( point GS_PARTICLE input[1], inout TriangleStream<PS_PART
 
 	//fill the output, so we have everything.
 	PS_PARTICLE output;
+	
+	output.initialRandom = input[0].initialRandom;
 	output.color		= input[0].color;
 	output.direction	= input[0].direction;
 	output.duration		= input[0].duration;

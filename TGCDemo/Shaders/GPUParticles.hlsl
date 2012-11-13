@@ -21,6 +21,7 @@ GS_PARTICLE ParticleSystemVS( VS_PARTICLE input )
 	GS_PARTICLE output = (GS_PARTICLE)0;
 	
 	output.position		= input.position;
+	output.initialRandom = input.initialRandom;
 	output.color		= input.color;
 	output.direction	= input.direction;
 	output.duration		= input.duration;
@@ -39,8 +40,9 @@ GS_PARTICLE ParticleSystemVS( VS_PARTICLE input )
 [maxvertexcount(1)]
 void ParticleSystemGS( point GS_PARTICLE input[1], inout PointStream<GS_PARTICLE> outputStream )
 {
-	GS_PARTICLE output;
+	GS_PARTICLE output	= (GS_PARTICLE)0;
 	output.position		= input[0].position;
+	output.initialRandom = input[0].initialRandom;
 	output.color		= input[0].color;
 	output.direction	= input[0].direction;
 	output.duration		= input[0].duration;
@@ -54,9 +56,10 @@ void ParticleSystemGS( point GS_PARTICLE input[1], inout PointStream<GS_PARTICLE
 
 	// if particle empty (duration <= 0 ) check if new ones need to be created (spawn rate), 
 	//											else: skip
-	float tempVal = (output.position.x+output.position.y+output.position.z)/3 + output.duration + output.speed;
 
-	float randomVal = rand(float2(delta, tempVal));
+	float tempVal = (output.position.x + output.position.y + output.position.z)/3 + output.speed + Delta;// + (output.color.x + output.color.y + output.color.z)/3;
+
+	float randomVal = rand(float2(Delta, tempVal));
 
 	if(alive)
 	{ 
@@ -64,42 +67,60 @@ void ParticleSystemGS( point GS_PARTICLE input[1], inout PointStream<GS_PARTICLE
 		{
 			output.flags = 0; //TODO: append any other flags
 
-			output.duration = spawnTime + (randomVal - 0.5) * spawnDeviation; // input random spawn wait with deviation.
+			output.duration = SpawnTime + (randomVal - 0.5) * SpawnDeviation; // input random spawn wait with deviation.
 			
 			//put a new random val in there
-			//randomVal = rand(float2(randomVal, tempVal));	
+			randomVal = rand(float2(randomVal,  output.initialRandom.x));	
 		} 
-		else
-		{
-			// move particle
-			// change position / color / alpha according to formula / change method.
-			// either type or different geometry shaders.
-			output.position += float4(0,output.speed * delta,0,0);
-		}
+		
+		// move particle
+		// change position / color / alpha according to formula / change method.
+		//output.color.rgb = output.color.rgb + delta * output.initialRandom.yzw;
+		// either type or different geometry shaders.
+		output.position.xyz = output.position.xyz + output.direction * (output.speed * Delta);
+
 	}
 	else if(output.duration <= 0 ) // dead and spawn wait over.
 	{
 		// SPAWN NEW PARTICLE!
 		output.flags = PARTICLEALIVE; //TODO: append any other flags
 
-		output.duration = durationTime + (randomVal - 0.5) * durationDeviation;
+		output.duration = DurationTime + (randomVal - 0.5) * DurationDeviation;
 		//put a new random val in there
-		//randomVal = rand(float2(randomVal, tempVal));
+		randomVal = rand(float2(randomVal, output.initialRandom.y));
 
-		output.position = positionStart + (randomVal - 0.5) * positionDeviation;
+		output.color = ColorStart + (randomVal - 0.5) * ColorDeviation;
 		//put a new random val in there
-		//randomVal = rand(float2(randomVal, tempVal));
+		randomVal = rand(float2(randomVal, Delta));
 
-		output.color = colorStart + (randomVal - 0.5) * colorDeviation;
+		
+		output.speed = SpeedStart + (randomVal - 0.5) * SpeedDeviation;
+
+		//position
+		output.position.x = PositionStart.x + (randomVal - 0.5) * PositionDeviation.x;
 		//put a new random val in there
-		//randomVal = rand(float2(randomVal, tempVal));
+		randomVal = rand(float2(randomVal, Delta));
 
-		output.speed = speed + (randomVal - 0.5) * speedDeviation;
+		output.position.y = PositionStart.y + (randomVal - 0.5) * PositionDeviation.y;
+		//put a new random val in there
+		randomVal = rand(float2(randomVal, Delta));
+
+		output.position.z = PositionStart.z + (randomVal - 0.5) * PositionDeviation.z;
+		//put a new random val in there
+		randomVal = rand(float2(randomVal, tempVal));
+
+		//direction
+		output.direction.x = DirectionStart.x + (randomVal -0.5) * DirectionDeviation.x;
+		randomVal = rand(float2(randomVal, Delta));
+		//output.direction.y = directionStart.y + (randomVal -0.5) * directionDeviation.y;
+		//randomVal = rand(float2(randomVal, delta));
+		//output.direction.z = directionStart.z + (randomVal -0.5) * directionDeviation.z;
+		//randomVal = rand(float2(randomVal, delta));
 
 	}
 		
 	// decrease time stuffs
-	output.duration -= delta;
+	output.duration = output.duration - Delta;
 	
 	//TODO compute and output a quad from given position and drawSize
 	//upper left

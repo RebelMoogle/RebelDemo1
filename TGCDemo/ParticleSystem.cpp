@@ -1,11 +1,12 @@
 #include "DXUT.h"
 #include "ParticleSystem.h"
 #include "constants.h"
+#include <random>
 
 
 ParticleSystem::ParticleSystem(void)
 {
-	mMaxParticleCount = 100;
+	mMaxParticleCount = 1000;
 	mSystemChange = false;
 	mSystemCB = new ConstantBuffer<PARTICLESYSTEMDATA>();
 	mFrameCB = new ConstantBuffer<PARTICLEFRAMEDATA>();
@@ -49,6 +50,7 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 		D3D11_SO_DECLARATION_ENTRY ParticleBufferOutputDecl[] =
 		{
 			{ 0, "SV_POSITION", 0, 0, 4, 0},
+			{ 0, "INITIALRANDOM", 0, 0, 4, 0},
 			{ 0, "COLOR", 0, 0, 4, 0},
 			{ 0, "DIRECTION", 0, 0, 3, 0},
 			{ 0, "DURATION", 0, 0, 1, 0},
@@ -89,13 +91,14 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 		const D3D11_INPUT_ELEMENT_DESC layout[] =
 		{
 			{"POSITION",		0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,	0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-			{"COLOR",			0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
-			{"DIRECTION",		0, DXGI_FORMAT_R32G32B32_FLOAT, 0,	32, D3D11_INPUT_PER_VERTEX_DATA, 0},
-			{"DURATION",		0, DXGI_FORMAT_R32_FLOAT,		0, 44, D3D11_INPUT_PER_VERTEX_DATA, 0},
-			{"SPEED",			0, DXGI_FORMAT_R32_FLOAT,		0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0},
-			{"ROTATION",		0, DXGI_FORMAT_R32_FLOAT,		0, 52, D3D11_INPUT_PER_VERTEX_DATA, 0},
-			{"SIZE",			0, DXGI_FORMAT_R32_FLOAT,		0, 56, D3D11_INPUT_PER_VERTEX_DATA, 0},
-			{"FLAGS",			0, DXGI_FORMAT_R32_UINT,		0, 60, D3D11_INPUT_PER_VERTEX_DATA, 0}
+			{"INITIALRANDOM",	0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"COLOR",			0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"DIRECTION",		0, DXGI_FORMAT_R32G32B32_FLOAT, 0,	48, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"DURATION",		0, DXGI_FORMAT_R32_FLOAT,		0, 60, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"SPEED",			0, DXGI_FORMAT_R32_FLOAT,		0, 64, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"ROTATION",		0, DXGI_FORMAT_R32_FLOAT,		0, 68, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"SIZE",			0, DXGI_FORMAT_R32_FLOAT,		0, 72, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{"FLAGS",			0, DXGI_FORMAT_R32_UINT,		0, 76, D3D11_INPUT_PER_VERTEX_DATA, 0}
 		}; //total size is 64
 
 		HRESULT hr = Device->CreateInputLayout(
@@ -192,18 +195,10 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 	D3D11_SUBRESOURCE_DATA particleInitData; //dead particles, shader will create new particles as it sees fit.
 	ZeroMemory( &particleInitData, sizeof(D3D11_SUBRESOURCE_DATA));
 
-	PARTICLEDATA deadParticle;
-	ZeroMemory(&deadParticle, sizeof(PARTICLEDATA));
-	deadParticle.position = D3DXVECTOR4(1,1,1,1);
-	deadParticle.duration = 0.0f; //zero duration == dead
-	deadParticle.color = D3DXVECTOR4(0.2f, 0.3f, 1.0f, 1.0f);
-	deadParticle.direction = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	deadParticle.speed = 0.0f;
-	deadParticle.rotation = 0.0f;
-	deadParticle.size = 1.0f;
-	deadParticle.flags = 0; // no flags set, all false
-	particleInitData.pSysMem = &deadParticle;
-	particleInitData.SysMemPitch = sizeof(PARTICLEDATA);
+	PARTICLEDATA* deadParticles = new PARTICLEDATA[mMaxParticleCount];
+	GimmeParticles(deadParticles);
+	particleInitData.pSysMem = deadParticles;
+	//particleInitData.SysMemPitch = sizeof(PARTICLEDATA)*mMaxParticleCount; // should only have meaning for textures
 
 
 	HRESULT hr = Device->CreateBuffer(&bd, &particleInitData, &mParticleBufferDraw);
@@ -243,21 +238,23 @@ bool ParticleSystem::D3DCreateDevice( ID3D11Device* Device, const DXGI_SURFACE_D
 
 bool ParticleSystem::D3DCreateSwapChain( ID3D11Device* Device, IDXGISwapChain* SwapChain, const DXGI_SURFACE_DESC* BackBufferSurfaceDesc )
 {
-	mSystemCB->Data.colorStart			= D3DXVECTOR4(0.2f,0.3f,1,1);
+	mSystemCB->Data.colorStart			= D3DXVECTOR4(0.6f,0.6f,1.0f,1);
 	mSystemCB->Data.colorEnd            = D3DXVECTOR4(1,1,1,1);
-	mSystemCB->Data.colorDeviation      = D3DXVECTOR4(0,0,0,0);
+	mSystemCB->Data.colorDeviation      = D3DXVECTOR4(0,0,0,1);
 	mSystemCB->Data.positionStart       = D3DXVECTOR4(0,0,0,0);
-	mSystemCB->Data.positionDeviation	= D3DXVECTOR4(10,1,1,0);
-	mSystemCB->Data.spawnTime			= 0.0f;
-	mSystemCB->Data.spawnDeviation		= 0.0f;
-	mSystemCB->Data.durationTime		= 5.0f;
-	mSystemCB->Data.durationDeviation	= 1.0f;
-	mSystemCB->Data.speed				= 0.0f;
-	mSystemCB->Data.speedDeviation		= 0.0f;
-	mSystemCB->Data.rotation			= 0.0f;
+	mSystemCB->Data.positionDeviation	= D3DXVECTOR4(1,0,100,0);
+	mSystemCB->Data.directionStart		= D3DXVECTOR4(1, 0, 0,1);
+	mSystemCB->Data.directionDeviation	= D3DXVECTOR4(0, 0, 0,1);
+	mSystemCB->Data.spawnTime			= 5.0f;
+	mSystemCB->Data.spawnDeviation		= 1.5f;
+	mSystemCB->Data.durationTime		= 1.0f;
+	mSystemCB->Data.durationDeviation	= 10.0f;
+	mSystemCB->Data.speedStart			= 100.0f;
+	mSystemCB->Data.speedDeviation		= 10.0f;
+	mSystemCB->Data.rotationStart		= 0.0f;
 	mSystemCB->Data.rotationDeviation	= 0.0f;
-	mSystemCB->Data.sizeStart			= 0.5f;
-	mSystemCB->Data.sizeDeviation		= 0.5f;
+	mSystemCB->Data.sizeStart			= 1.0f;
+	mSystemCB->Data.sizeDeviation		= 1.0f;
 	mSystemChange = true;
 
 	//immCon->Release();
@@ -298,16 +295,16 @@ void ParticleSystem::Render(ID3D11DeviceContext* ImmediateContext, ID3D11RenderT
 	// set Frame Buffer
 	ID3D11Buffer* tempBuffer = mFrameCB->GetBuffer();
 
-	ImmediateContext->VSSetConstantBuffers(2, 1, &tempBuffer);
-	ImmediateContext->GSSetConstantBuffers(2, 1, &tempBuffer);
-	ImmediateContext->PSSetConstantBuffers(2, 1, &tempBuffer);
+	ImmediateContext->VSSetConstantBuffers(3, 1, &tempBuffer);
+	ImmediateContext->GSSetConstantBuffers(3, 1, &tempBuffer);
+	ImmediateContext->PSSetConstantBuffers(3, 1, &tempBuffer);
 
 	//Set System Data Buffer
 	tempBuffer = mSystemCB->GetBuffer();
 
-	ImmediateContext->VSSetConstantBuffers(3, 1, &tempBuffer);
-	ImmediateContext->GSSetConstantBuffers(3, 1, &tempBuffer);
-	ImmediateContext->PSSetConstantBuffers(3, 1, &tempBuffer);
+	ImmediateContext->VSSetConstantBuffers(2, 1, &tempBuffer);
+	ImmediateContext->GSSetConstantBuffers(2, 1, &tempBuffer);
+	ImmediateContext->PSSetConstantBuffers(2, 1, &tempBuffer);
 	
 	ImmediateContext->PSSetSamplers(0, 1, &mDiffuseSampler);
 	ImmediateContext->GSSetSamplers(0, 1, &mDiffuseSampler);
@@ -319,12 +316,14 @@ void ParticleSystem::Render(ID3D11DeviceContext* ImmediateContext, ID3D11RenderT
 	// first frame: we haven't streamed out yet.
 	if (mInitParticle)
 	{
-		ImmediateContext->Draw(1,0);
+		ImmediateContext->Draw(mMaxParticleCount,0);
 		mInitParticle = false;
 	}
 	else
 	{
-		ImmediateContext->DrawAuto();
+		// draw all of them for now.
+		// TODO: manage particle creation on GPU
+		ImmediateContext->Draw(mMaxParticleCount,0); //DrawAuto();
 	}
 	
 	
@@ -353,18 +352,18 @@ void ParticleSystem::Render(ID3D11DeviceContext* ImmediateContext, ID3D11RenderT
 	ImmediateContext->GSSetShader(mRenderParticlesGS->GetShader(), NULL, 0);
 	ImmediateContext->PSSetShader(mRenderParticlesPS->GetShader(), NULL, 0);
 
-	tempBuffer = mFrameCB->GetBuffer();
+	//tempBuffer = mFrameCB->GetBuffer();
 
-	ImmediateContext->VSSetConstantBuffers(2, 1, &tempBuffer);
-	ImmediateContext->GSSetConstantBuffers(2, 1, &tempBuffer);
-	ImmediateContext->PSSetConstantBuffers(2, 1, &tempBuffer);
+	//ImmediateContext->VSSetConstantBuffers(2, 1, &tempBuffer);
+	//ImmediateContext->GSSetConstantBuffers(2, 1, &tempBuffer);
+	//ImmediateContext->PSSetConstantBuffers(2, 1, &tempBuffer);
 
-	//Set System Data Buffer
-	tempBuffer = mSystemCB->GetBuffer();
+	////Set System Data Buffer
+	//tempBuffer = mSystemCB->GetBuffer();
 
-	ImmediateContext->VSSetConstantBuffers(3, 1, &tempBuffer);
-	ImmediateContext->GSSetConstantBuffers(3, 1, &tempBuffer);
-	ImmediateContext->PSSetConstantBuffers(3, 1, &tempBuffer);
+	//ImmediateContext->VSSetConstantBuffers(3, 1, &tempBuffer);
+	//ImmediateContext->GSSetConstantBuffers(3, 1, &tempBuffer);
+	//ImmediateContext->PSSetConstantBuffers(3, 1, &tempBuffer);
 
 	ImmediateContext->PSSetSamplers(0, 1, &mDiffuseSampler);
 	ImmediateContext->GSSetSamplers(0, 1, &mDiffuseSampler);
@@ -420,5 +419,30 @@ void ParticleSystem::SetSystemData( PARTICLESYSTEMDATA* newSysData )
 {
 	mSystemCB->Data = *newSysData;
 	mSystemChange = true;
+}
+
+//fills up given with mMaxParticleCount particles
+void ParticleSystem::GimmeParticles(PARTICLEDATA* fillerUp)
+{
+	// a little random engine (mersenne twister) 
+	std::random_device rd;
+	std::mt19937 mRandomEngine(rd());
+	std::normal_distribution<float> mRandomDist(0, 1);
+
+	ZeroMemory(fillerUp, sizeof(PARTICLEDATA) * mMaxParticleCount);
+	for (UINT i = 0; i < mMaxParticleCount; i++)
+	{
+		fillerUp[i].position = D3DXVECTOR4(	1.0f * mRandomDist(mRandomEngine),
+											1.0f * mRandomDist(mRandomEngine),
+											1.0f * mRandomDist(mRandomEngine),1) ;
+		fillerUp[i].initRandom = D3DXVECTOR4(mRandomDist(mRandomEngine), mRandomDist(mRandomEngine), mRandomDist(mRandomEngine), mRandomDist(mRandomEngine));
+		fillerUp[i].duration = 0.0f; //zero duration == dead
+		fillerUp[i].color = D3DXVECTOR4(0.2f, 0.3f, 1.0f, 1.0f);
+		fillerUp[i].direction = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		fillerUp[i].speed = 0.0f;
+		fillerUp[i].rotation = 0.0f;
+		fillerUp[i].size = 1.0f;
+		fillerUp[i].flags = 0; // no flags set, all false
+	}
 }
 
